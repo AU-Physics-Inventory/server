@@ -20,11 +20,15 @@ class AuthenticationController @Autowired constructor(private val authentication
 
     @PostMapping("/login")
     fun  login(@RequestBody loginRequest: LoginRequest) : ResponseEntity<AuthenticationToken> {
-        logger.info("Request received {}", loginRequest.username)
+        logger.info("[Auth Controller] Login request received for user: {}", loginRequest.username)
         val token = this.authenticationService.authenticateUser(loginRequest);
         return if (token == null) {
+            logger.info("[Auth Controller] Unable to log in user {}", loginRequest.username)
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        } else ResponseEntity.status(HttpStatus.OK).body(token)
+        } else {
+            logger.info("[Auth Controller] User logged in successfully - returning JWT to user {}", loginRequest.username)
+            ResponseEntity.status(HttpStatus.OK).body(token)
+        }
     }
 
     @PostMapping("/register")

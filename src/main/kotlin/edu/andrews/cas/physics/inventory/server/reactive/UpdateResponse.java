@@ -1,12 +1,13 @@
 package edu.andrews.cas.physics.inventory.server.reactive;
 
 import com.mongodb.client.result.InsertOneResult;
+import com.mongodb.client.result.UpdateResult;
 import org.reactivestreams.Subscription;
 
 import java.util.concurrent.CompletableFuture;
 
-public class InsertionResponse extends Subscriber<Boolean, InsertOneResult> {
-    public InsertionResponse(CompletableFuture<Boolean> future) {
+public class UpdateResponse extends Subscriber<Boolean, UpdateResult> {
+    public UpdateResponse(CompletableFuture<Boolean> future) {
         super(future);
     }
 
@@ -16,8 +17,8 @@ public class InsertionResponse extends Subscriber<Boolean, InsertOneResult> {
     }
 
     @Override
-    public void onNext(InsertOneResult insertOneResult) {
-        super.future.complete(insertOneResult.wasAcknowledged());
+    public void onNext(UpdateResult updateResult) {
+        super.future.complete(updateResult.wasAcknowledged());
     }
 
     @Override
