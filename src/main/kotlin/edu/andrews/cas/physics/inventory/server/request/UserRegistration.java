@@ -1,25 +1,20 @@
-package edu.andrews.cas.physics.inventory.server.auth;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package edu.andrews.cas.physics.inventory.server.request;
 
 public class UserRegistration {
-    @JsonProperty
     private String email;
-
-    @JsonProperty
     private String username;
-
-    @JsonProperty
     private String password;
+    private String accessCode;
 
     public UserRegistration() {
 
     }
 
-    public UserRegistration(String email, String username, String password) {
+    public UserRegistration(String email, String username, String password, String accessCode) {
         this.email = email;
         this.username = username;
         this.password = password;
+        this.accessCode = accessCode;
     }
 
     public String getUsername() {
@@ -44,5 +39,13 @@ public class UserRegistration {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getAccessCode() {
+        return accessCode;
+    }
+
+    public void setAccessCode(String accessCode) {
+        this.accessCode = accessCode;
     }
 }

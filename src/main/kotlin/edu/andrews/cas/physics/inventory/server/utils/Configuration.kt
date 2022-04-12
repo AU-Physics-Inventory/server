@@ -1,5 +1,6 @@
-package edu.andrews.cas.physics.inventory.server
+package edu.andrews.cas.physics.inventory.server.utils
 
+import edu.andrews.cas.physics.inventory.server.interceptor.AuthenticationInterceptor
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Autowired
@@ -7,6 +8,8 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.util.*
 import javax.crypto.SecretKey
 import javax.mail.Authenticator
@@ -14,7 +17,7 @@ import javax.mail.PasswordAuthentication
 import javax.mail.Session
 
 @Configuration
-open class Configuration {
+open class Configuration @Autowired constructor(private val authenticationInterceptor: AuthenticationInterceptor) : WebMvcConfigurer {
     @Primary
     @Bean("configProperties")
     open fun configProperties(): Properties {
@@ -43,5 +46,9 @@ open class Configuration {
                 return PasswordAuthentication(mailConfig.getProperty("mail.smtp.user"), mailConfig.getProperty("mail.smtp.password"))
             }
         })
+    }
+
+    override fun addInterceptors(registry: InterceptorRegistry) {
+        registry.addInterceptor(authenticationInterceptor)
     }
 }

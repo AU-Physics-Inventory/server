@@ -1,9 +1,9 @@
 package edu.andrews.cas.physics.inventory.server.controllers
 
 import edu.andrews.cas.physics.inventory.server.auth.AuthenticationToken
-import edu.andrews.cas.physics.inventory.server.auth.LoginRequest
+import edu.andrews.cas.physics.inventory.server.request.UserLogin
 import edu.andrews.cas.physics.inventory.server.service.AuthenticationService
-import edu.andrews.cas.physics.inventory.server.auth.UserRegistration
+import edu.andrews.cas.physics.inventory.server.request.UserRegistration
 import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
 import edu.andrews.cas.physics.inventory.server.response.ErrorResponse
 import org.apache.logging.log4j.LogManager
@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RequestBody
 class AuthenticationController @Autowired constructor(private val authenticationService: AuthenticationService) {
 
     @PostMapping("/login")
-    fun  login(@RequestBody loginRequest: LoginRequest) : ResponseEntity<AuthenticationToken> {
-        logger.info("[Auth Controller] Login request received for user: {}", loginRequest.username)
-        val token = this.authenticationService.authenticateUser(loginRequest);
+    fun  login(@RequestBody userLogin: UserLogin) : ResponseEntity<AuthenticationToken> {
+        logger.info("[Auth Controller] Login request received for user: {}", userLogin.username)
+        val token = this.authenticationService.authenticateUser(userLogin);
         return if (token == null) {
-            logger.info("[Auth Controller] Unable to log in user {}", loginRequest.username)
+            logger.info("[Auth Controller] Unable to log in user {}", userLogin.username)
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         } else {
-            logger.info("[Auth Controller] User logged in successfully - returning JWT to user {}", loginRequest.username)
+            logger.info("[Auth Controller] User logged in successfully - returning JWT to user {}", userLogin.username)
             ResponseEntity.status(HttpStatus.OK).body(token)
         }
     }
@@ -41,6 +41,8 @@ class AuthenticationController @Autowired constructor(private val authentication
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse("Unable to register user", "An unexpected database error occurred"))
         }
     }
+
+    // TODO IMPLEMENT LOGOUT
 
     companion object {
         private val logger: Logger = LogManager.getLogger();

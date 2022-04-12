@@ -1,19 +1,18 @@
 package edu.andrews.cas.physics.inventory.server.service
 
-import edu.andrews.cas.physics.inventory.server.auth.UserRegistration
+import edu.andrews.cas.physics.inventory.server.request.UserRegistration
 import edu.andrews.cas.physics.inventory.server.dao.UserDAO
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyVerifiedException
 import edu.andrews.cas.physics.inventory.server.exception.NoSuchUserException
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.bson.Document
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import java.io.File
-import java.net.URLEncoder
 import java.nio.charset.Charset
-import java.text.MessageFormat
 import java.time.Instant
 import java.util.*
 import javax.mail.Message
@@ -47,13 +46,33 @@ class EmailService @Autowired constructor(private val mailSession: Session,
         Transport.send(msg)
     }
 
+    fun resendWelcomeEmail(user: String) {
+        val documentFuture = userDAO.findUserByName(user)
+        val userDocuments = documentFuture.get()
+        if (userDocuments.isEmpty()) throw NoSuchUserException(user)
+        if (isUserVerified(userDocuments[0])) throw AlreadyVerifiedException()
+        sendWelcomeEmail(
+            UserRegistration(
+                userDocuments[0].getString("email"),
+                user,
+                null,
+                null
+            )
+        )
+    }
+
+    fun sendRegistrationEmail(email: String, accessCode: String) {
+        TODO("Not yet implemented")
+    }
+
     fun validateEmailAddress(emailAddress: String) : InternetAddress {
         logger.info("[Email Service] Validating email address: {}", emailAddress)
         return InternetAddress.parse(emailAddress)[0]
     }
 
     fun verifyEmail(user: String) {
-        logger.info("[Email Service] Setting email as verified for ", user)
+        logger.info("[Email Service] Attempting to verify email for {}", user)
+        if (isUserVerified(user)) throw AlreadyVerifiedException()
         val userEmailAddress = userDAO.verifyEmail(user)
         sendVerificationSuccessEmail(userEmailAddress)
     }
@@ -63,7 +82,7 @@ class EmailService @Autowired constructor(private val mailSession: Session,
         val msg = MimeMessage(mailSession)
         val template = FileUtils
             .readFileToString(
-                File(ClassLoader.getSystemResource("templates/verification_success_email.html").toURI()),
+                File(ClassLoader.getSystemResource("templates/email_verification_success_email.html").toURI()),
                 Charset.forName("UTF-8"))
         msg.setFrom(validateEmailAddress(emailConfig.getProperty("mail.from")))
         msg.setRecipient(Message.RecipientType.TO, validateEmailAddress(emailAddress))
@@ -73,12 +92,16 @@ class EmailService @Autowired constructor(private val mailSession: Session,
         Transport.send(msg)
     }
 
-    fun resendWelcomeEmail(user: String) {
-        val documentFuture = userDAO.findUser(user)
+    private fun isUserVerified(user: String) : Boolean {
+        logger.info("[Email Service] Checking if user is verified")
+        val documentFuture = userDAO.findUserByName(user)
         val userDocuments = documentFuture.get()
         if (userDocuments.isEmpty()) throw NoSuchUserException(user)
-        if (userDocuments[0].getBoolean("email_verified")) throw AlreadyVerifiedException()
-        sendWelcomeEmail(UserRegistration(userDocuments[0].getString("email"), user, null))
+        return userDocuments[0].getBoolean("email_verified")
+    }
+
+    private fun isUserVerified(user: Document) : Boolean {
+        return user.getBoolean("email_verified")
     }
 
     companion object {

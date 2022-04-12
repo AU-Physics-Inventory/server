@@ -1,5 +1,6 @@
 package edu.andrews.cas.physics.inventory.server.controllers
 
+import edu.andrews.cas.physics.inventory.server.exception.AlreadyVerifiedException
 import edu.andrews.cas.physics.inventory.server.service.EmailService
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
@@ -20,11 +21,18 @@ class EmailController @Autowired constructor(private val emailService: EmailServ
     @ResponseBody
     fun verifyEmail(@RequestParam username: String) : String {
         logger.info("[Email Controller] Received e-mail verification request from user {}", username)
-        emailService.verifyEmail(username)
-        return FileUtils
-            .readFileToString(
-                File(ClassLoader.getSystemResource("templates/email_verification_successful.html").toURI()),
-                Charset.forName("UTF-8"))
+        return try {
+            emailService.verifyEmail(username)
+            FileUtils
+                .readFileToString(
+                    File(ClassLoader.getSystemResource("templates/email_verification_successful.html").toURI()),
+                    Charset.forName("UTF-8"))
+        } catch (e: AlreadyVerifiedException) {
+            FileUtils
+                .readFileToString(
+                    File(ClassLoader.getSystemResource("templates/email_already_verified.html").toURI()),
+                    Charset.forName("UTF-8"))
+        }
     }
 
     @GetMapping("/resendWelcomeEmail")

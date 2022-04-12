@@ -23,12 +23,21 @@ class UserDAO @Autowired constructor(private val mongodb: MongoDatabase){
         return future.get().getString("email")
     }
 
-    fun findUser(user: String): CompletableFuture<List<Document>> {
+    fun findUserByName(user: String): CompletableFuture<List<Document>> {
         logger.info("[User DAO] Retrieving document for user {}", user)
         val collection = mongodb.getCollection(USER_COLLECTION)
         val future = CompletableFuture<List<Document>>()
         val finder = DocumentFinder(future)
         collection.find(eq("username", user)).subscribe(finder)
+        return future
+    }
+
+    fun findUserByEmail(email: String) : CompletableFuture<List<Document>> {
+        logger.info("[User DAO] Retrieving documents for users with email {}", email)
+        val collection = mongodb.getCollection(USER_COLLECTION)
+        val future = CompletableFuture<List<Document>>()
+        val finder = DocumentFinder(future)
+        collection.find(eq("email", email)).subscribe(finder)
         return future
     }
 
