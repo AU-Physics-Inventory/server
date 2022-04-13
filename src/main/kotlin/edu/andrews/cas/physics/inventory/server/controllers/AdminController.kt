@@ -2,6 +2,7 @@ package edu.andrews.cas.physics.inventory.server.controllers
 
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyRegisteredException
 import edu.andrews.cas.physics.inventory.server.request.UserInvitation
+import edu.andrews.cas.physics.inventory.server.request.UserRoles
 import edu.andrews.cas.physics.inventory.server.service.AdminService
 import edu.andrews.cas.physics.inventory.server.service.AuthenticationService
 import org.apache.logging.log4j.LogManager
@@ -35,6 +36,11 @@ class AdminController @Autowired constructor(private val adminService: AdminServ
             logger.error(e)
             ResponseEntity.internalServerError().build()
         }
+    }
+
+    @PostMapping("/admin/addUserRole")
+    fun addUserRoles(@RequestBody userRoles: UserRoles) {
+        logger.info("[Admin Controller] Received request to add roles to user {}", userRoles.username)
     }
 
     @GetMapping("/admin/logoutUser")

@@ -21,23 +21,13 @@ import java.util.concurrent.CompletableFuture
 
 @Component
 open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDatabase, private val userDAO: UserDAO) {
-    fun getRolesSaltAndHash(username: String) : Triple<List<String>, String, String>? {
-        logger.info("[Auth DAO] Retrieving salt and hash for user {}", username)
-        val collection = this.mongodb.getCollection(AUTH_COLLECTION)
-        val future = CompletableFuture<List<User>>()
-        val userFinder = UserFinder(future)
-        collection.find(eq("username", username)).subscribe(userFinder)
-        val users = future.get()
-        return if (users.isNotEmpty()) Triple(users[0].roles, users[0].salt, users[0].password) else null
-    }
-
     fun registerUser(userRegistration: UserRegistration, salt: String) : RegistrationResponse {
         logger.info("[Auth DAO] Registering user {}", userRegistration.username)
         if (userRegistration.accessCode != null) return registerPreRegisteredUser(userRegistration, salt)
         val usersWithEmail = userDAO.findUserByEmail(userRegistration.email).get()
         val usersWithUsername = userDAO.findUserByName(userRegistration.username).get()
-        val emailTaken = usersWithEmail.isEmpty()
-        val usernameTaken = usersWithUsername.isEmpty()
+        val emailTaken = usersWithEmail.isNotEmpty()
+        val usernameTaken = usersWithUsername.isNotEmpty()
         val response = RegistrationResponse(usernameTaken, emailTaken)
         logger.info("[Auth DAO] Registration of user '{}' successful? {}", userRegistration.username, response.isSuccess)
         if (response.isSuccess) {
@@ -93,6 +83,12 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
                 set("last_attempt", now)))
             .subscribe(updateResponse)
         future.whenCompleteAsync { _, _ -> }
+    }
+
+    fun findUser(username: String): User? {
+        val future = userDAO.findUserByName(username)
+        val users = future.get()
+        return if (users.isNotEmpty()) users[0] else null
     }
 
     companion object {

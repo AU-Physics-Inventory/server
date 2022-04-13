@@ -8,7 +8,6 @@ import edu.andrews.cas.physics.inventory.server.model.User
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.bson.Document
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -28,6 +27,7 @@ class EmailService @Autowired constructor(private val mailSession: Session,
           @Qualifier("configProperties") private val config: Properties,
           @Qualifier("emailProperties") private val emailConfig: Properties){
     fun sendEmailVerificationEmail(userRegistration: UserRegistration) {
+        return
         logger.info("[Email Service] Sending welcome email to user {}", userRegistration.username)
         val msg = MimeMessage(mailSession)
         val template = FileUtils
@@ -79,6 +79,7 @@ class EmailService @Autowired constructor(private val mailSession: Session,
     }
 
     fun sendRegistrationEmail(email: String, accessCode: String) {
+        return
         TODO("Not yet implemented")
     }
 
@@ -95,6 +96,7 @@ class EmailService @Autowired constructor(private val mailSession: Session,
     }
 
     private fun sendVerificationSuccessEmail(emailAddress: String) {
+        return
         logger.info("[Email Service] Sending verification success email to address {}", emailAddress)
         val msg = MimeMessage(mailSession)
         val template = FileUtils
@@ -112,9 +114,9 @@ class EmailService @Autowired constructor(private val mailSession: Session,
     private fun isUserVerified(user: String) : Boolean {
         logger.info("[Email Service] Checking if user is verified")
         val documentFuture = userDAO.findUserByName(user)
-        val userDocuments = documentFuture.get()
-        if (userDocuments.isEmpty()) throw NoSuchUserException(user)
-        return userDocuments[0].isEmailVerified
+        val users = documentFuture.get()
+        if (users.isEmpty()) throw NoSuchUserException(user)
+        return users[0].isEmailVerified
     }
 
     private fun isUserVerified(user: User) : Boolean {

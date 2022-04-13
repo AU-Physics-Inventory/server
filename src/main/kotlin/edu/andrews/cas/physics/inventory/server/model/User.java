@@ -24,7 +24,7 @@ public class User {
     }
 
     public User status(UserStatus status) {
-        userDocument.append("status", status);
+        userDocument.append("status", status.name());
         return this;
     }
 
@@ -76,7 +76,7 @@ public class User {
     }
 
     public UserStatus getStatus() {
-        return userDocument.get("status", UserStatus.class);
+        return UserStatus.valueOf(userDocument.getString("status"));
     }
 
     public String getUsername() {
@@ -117,6 +117,11 @@ public class User {
 
     public int getNumFailedAuthenticationAttempts() {
         return userDocument.getInteger("failedAttempts");
+    }
+
+    @Override
+    public String toString() {
+        return userDocument.toString();
     }
 }
 

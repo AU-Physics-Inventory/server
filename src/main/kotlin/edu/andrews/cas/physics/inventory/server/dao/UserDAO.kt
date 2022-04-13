@@ -20,7 +20,7 @@ class UserDAO @Autowired constructor(private val mongodb: MongoDatabase){
         val collection = mongodb.getCollection(USER_COLLECTION)
         val future = CompletableFuture<Document>()
         val updateResponse = FindOneAndUpdateResponse(future)
-        collection.findOneAndUpdate(eq("username", user), set("email_verified", true)).subscribe(updateResponse)
+        collection.findOneAndUpdate(eq("username", user), set("emailVerified", true)).subscribe(updateResponse)
         return future.get().getString("email")
     }
 

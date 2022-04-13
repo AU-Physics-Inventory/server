@@ -51,19 +51,28 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     }
 
     private boolean isUserAdmin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.info("[Auth Interceptor] Checking if user is admin");
         var authenticated = isAuthenticated(request);
         var result = authenticated.getFirst();
         if (result) result = ((String) authenticated.getSecond().getBody().get("roles")).contains("admin");
-        if (!result) response.sendError(401, "Unable to authenticate admin user.");
+        if (!result) {
+            String errorMsg = "Unable to authenticate admin user.";
+            logger.info("[Auth Interceptor] {}", errorMsg);
+            response.sendError(401, errorMsg);
+        }
+        else logger.info("[Auth Interceptor] User is admin");
         return result;
     }
 
     private Pair<Boolean, Jws<Claims>> isAuthenticated(HttpServletRequest request) {
+        logger.info("[Auth Interceptor] Checking if user is authenticated");
         try {
             var claims = getJwsClaimsFromRequest(request);
             if (claims == null || !loggedInUsers.contains(claims.getBody().getSubject())) throw new Exception();
+            logger.info("[Auth Interceptor] User {} is authenticated", claims.getBody().getSubject());
             return new Pair<>(true, claims);
         } catch(Exception e) {
+            logger.info("[Auth Interceptor] User is not authenticated. Either Authorization token is malformed or missing, or user is no longer logged in.");
             return new Pair<>(false, null);
         }
     }
