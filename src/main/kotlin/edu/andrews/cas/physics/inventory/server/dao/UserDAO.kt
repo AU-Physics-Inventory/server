@@ -3,7 +3,8 @@ package edu.andrews.cas.physics.inventory.server.dao
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Updates.set
 import com.mongodb.reactivestreams.client.MongoDatabase
-import edu.andrews.cas.physics.inventory.server.reactive.DocumentFinder
+import edu.andrews.cas.physics.inventory.server.model.User
+import edu.andrews.cas.physics.inventory.server.reactive.UserFinder
 import edu.andrews.cas.physics.inventory.server.reactive.FindOneAndUpdateResponse
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -23,20 +24,20 @@ class UserDAO @Autowired constructor(private val mongodb: MongoDatabase){
         return future.get().getString("email")
     }
 
-    fun findUserByName(user: String): CompletableFuture<List<Document>> {
+    fun findUserByName(user: String): CompletableFuture<List<User>> {
         logger.info("[User DAO] Retrieving document for user {}", user)
         val collection = mongodb.getCollection(USER_COLLECTION)
-        val future = CompletableFuture<List<Document>>()
-        val finder = DocumentFinder(future)
+        val future = CompletableFuture<List<User>>()
+        val finder = UserFinder(future)
         collection.find(eq("username", user)).subscribe(finder)
         return future
     }
 
-    fun findUserByEmail(email: String) : CompletableFuture<List<Document>> {
+    fun findUserByEmail(email: String) : CompletableFuture<List<User>> {
         logger.info("[User DAO] Retrieving documents for users with email {}", email)
         val collection = mongodb.getCollection(USER_COLLECTION)
-        val future = CompletableFuture<List<Document>>()
-        val finder = DocumentFinder(future)
+        val future = CompletableFuture<List<User>>()
+        val finder = UserFinder(future)
         collection.find(eq("email", email)).subscribe(finder)
         return future
     }

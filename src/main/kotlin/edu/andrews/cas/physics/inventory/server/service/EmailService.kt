@@ -4,6 +4,7 @@ import edu.andrews.cas.physics.inventory.server.request.UserRegistration
 import edu.andrews.cas.physics.inventory.server.dao.UserDAO
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyVerifiedException
 import edu.andrews.cas.physics.inventory.server.exception.NoSuchUserException
+import edu.andrews.cas.physics.inventory.server.model.User
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -26,7 +27,7 @@ class EmailService @Autowired constructor(private val mailSession: Session,
                                           private val userDAO: UserDAO,
           @Qualifier("configProperties") private val config: Properties,
           @Qualifier("emailProperties") private val emailConfig: Properties){
-    fun sendWelcomeEmail(userRegistration: UserRegistration) {
+    fun sendEmailVerificationEmail(userRegistration: UserRegistration) {
         logger.info("[Email Service] Sending welcome email to user {}", userRegistration.username)
         val msg = MimeMessage(mailSession)
         val template = FileUtils
@@ -46,19 +47,35 @@ class EmailService @Autowired constructor(private val mailSession: Session,
         Transport.send(msg)
     }
 
-    fun resendWelcomeEmail(user: String) {
+    fun resendEmailVerificationEmail(user: String) {
         val documentFuture = userDAO.findUserByName(user)
-        val userDocuments = documentFuture.get()
-        if (userDocuments.isEmpty()) throw NoSuchUserException(user)
-        if (isUserVerified(userDocuments[0])) throw AlreadyVerifiedException()
-        sendWelcomeEmail(
+        val users = documentFuture.get()
+        if (users.isEmpty()) throw NoSuchUserException(user)
+        if (isUserVerified(users[0])) throw AlreadyVerifiedException()
+        sendEmailVerificationEmail(
             UserRegistration(
-                userDocuments[0].getString("email"),
+                users[0].email,
                 user,
                 null,
-                null
+                null,
+                false
             )
         )
+    }
+
+    fun sendPreRegisteredUserRegistrationSuccessEmail(emailAddress: String) {
+        logger.info("[Email Service] Sending verification success email to address {}", emailAddress)
+        val msg = MimeMessage(mailSession)
+        val template = FileUtils
+            .readFileToString(
+                File(ClassLoader.getSystemResource("templates/preregistered_user_registration_success_email.html").toURI()),
+                Charset.forName("UTF-8"))
+        msg.setFrom(validateEmailAddress(emailConfig.getProperty("mail.from")))
+        msg.setRecipient(Message.RecipientType.TO, validateEmailAddress(emailAddress))
+        msg.subject = "Welcome to Physics Inventory"
+        msg.setContent(template, "text/html")
+        msg.sentDate = Date.from(Instant.now())
+        Transport.send(msg)
     }
 
     fun sendRegistrationEmail(email: String, accessCode: String) {
@@ -97,11 +114,11 @@ class EmailService @Autowired constructor(private val mailSession: Session,
         val documentFuture = userDAO.findUserByName(user)
         val userDocuments = documentFuture.get()
         if (userDocuments.isEmpty()) throw NoSuchUserException(user)
-        return userDocuments[0].getBoolean("email_verified")
+        return userDocuments[0].isEmailVerified
     }
 
-    private fun isUserVerified(user: Document) : Boolean {
-        return user.getBoolean("email_verified")
+    private fun isUserVerified(user: User) : Boolean {
+        return user.isEmailVerified
     }
 
     companion object {

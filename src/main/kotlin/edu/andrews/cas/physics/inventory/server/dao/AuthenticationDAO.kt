@@ -1,74 +1,76 @@
 package edu.andrews.cas.physics.inventory.server.dao
 
 import com.mongodb.client.model.Filters.eq
-import com.mongodb.client.model.Filters.or
 import com.mongodb.client.model.Updates.*
 import com.mongodb.reactivestreams.client.MongoDatabase
 import edu.andrews.cas.physics.inventory.server.request.UserRegistration
 import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
+import edu.andrews.cas.physics.inventory.server.exception.RegistrationNotFoundException
 import edu.andrews.cas.physics.inventory.server.model.User
 import edu.andrews.cas.physics.inventory.server.model.UserStatus
-import edu.andrews.cas.physics.inventory.server.reactive.DocumentFinder
+import edu.andrews.cas.physics.inventory.server.reactive.UserFinder
 import edu.andrews.cas.physics.inventory.server.reactive.InsertOneResponse
 import edu.andrews.cas.physics.inventory.server.reactive.UpdateResponse
 import edu.andrews.cas.physics.inventory.server.response.RegistrationResponse
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.bson.Document
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.concurrent.CompletableFuture
 
 @Component
-open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDatabase) {
-    fun getRolesPepperAndHash(username: String) : Triple<List<String>, String, String>? {
-        logger.info("[Auth DAO] Retrieving pepper and hash for user {}", username)
+open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDatabase, private val userDAO: UserDAO) {
+    fun getRolesSaltAndHash(username: String) : Triple<List<String>, String, String>? {
+        logger.info("[Auth DAO] Retrieving salt and hash for user {}", username)
         val collection = this.mongodb.getCollection(AUTH_COLLECTION)
-        val future = CompletableFuture<List<Document>>()
-        val documentFinder = DocumentFinder(future)
-        collection.find(eq("username", username)).subscribe(documentFinder)
-        val documents = future.get()
-        return if (documents.isNotEmpty()) Triple(documents[0].getList("roles", String::class.java), documents[0].getString("salt"), documents[0].getString("password")) else null
+        val future = CompletableFuture<List<User>>()
+        val userFinder = UserFinder(future)
+        collection.find(eq("username", username)).subscribe(userFinder)
+        val users = future.get()
+        return if (users.isNotEmpty()) Triple(users[0].roles, users[0].salt, users[0].password) else null
     }
 
-    //TODO HANDLE EVENT WHERE ACCESS CODE IS PROVIDED IN REGISTRATION
-    fun registerUser(userRegistration: UserRegistration, pepper: String) : RegistrationResponse {
+    fun registerUser(userRegistration: UserRegistration, salt: String) : RegistrationResponse {
         logger.info("[Auth DAO] Registering user {}", userRegistration.username)
-        val collection = this.mongodb.getCollection(AUTH_COLLECTION)
-        val registeredFuture = CompletableFuture<List<Document>>()
-        val documentFinder = DocumentFinder(registeredFuture)
-        collection.find(or(
-                eq("username", userRegistration.username),
-                eq("email", userRegistration.email)
-            )).subscribe(documentFinder)
-        var email = false;
-        var username = false;
-        val documents = registeredFuture.get()
-        if (documents.isEmpty()) {
+        if (userRegistration.accessCode != null) return registerPreRegisteredUser(userRegistration, salt)
+        val usersWithEmail = userDAO.findUserByEmail(userRegistration.email).get()
+        val usersWithUsername = userDAO.findUserByName(userRegistration.username).get()
+        val emailTaken = usersWithEmail.isEmpty()
+        val usernameTaken = usersWithUsername.isEmpty()
+        val response = RegistrationResponse(usernameTaken, emailTaken)
+        logger.info("[Auth DAO] Registration of user '{}' successful? {}", userRegistration.username, response.isSuccess)
+        if (response.isSuccess) {
             val future = CompletableFuture<Boolean>()
-            val registrationSubscription =
-                InsertOneResponse(future)
-            val registrationDocument = User()
+            val insertResponse = InsertOneResponse(future)
+            val collection = mongodb.getCollection(AUTH_COLLECTION)
+            val userDocument = User()
                 .status(UserStatus.ACTIVE)
-                .username(userRegistration.username)
                 .email(userRegistration.email)
+                .username(userRegistration.username)
                 .password(userRegistration.password)
-                .salt(pepper)
+                .salt(salt)
                 .build()
-            collection.insertOne(registrationDocument).subscribe(registrationSubscription)
+            collection.insertOne(userDocument).subscribe(insertResponse)
             val ack = future.get()
             if (!ack.equals(true)) throw DatabaseException()
-        } else {
-            for (doc in documents) {
-                if (email && username) break
-                if (doc.getString("email").equals(userRegistration.email)) email = true
-                if (doc.getString("username").equals(userRegistration.username)) username = true
-            }
         }
-        val response = RegistrationResponse(username, email)
-        logger.info("[Auth DAO] Registration of user '{}' successful? {}", userRegistration.username, response.isSuccess)
         return response
+    }
+
+    fun registerPreRegisteredUser(userRegistration: UserRegistration, salt: String): RegistrationResponse {
+        logger.info("[Auth DAO] Attempting to register a pre-registered user with access code {} and email {}", userRegistration.accessCode, userRegistration.email)
+        val users = userDAO.findUserByEmail(userRegistration.email).get()
+        if (users.isEmpty() || !users[0].accessCode.equals(userRegistration.accessCode)) throw RegistrationNotFoundException()
+        if (userDAO.findUserByName(userRegistration.username).get().isNotEmpty()) return RegistrationResponse(true, false);
+        val user = users[0].username(userRegistration.username).password(userRegistration.password).salt(salt).status(UserStatus.ACTIVE)
+        val future = CompletableFuture<Boolean>()
+        val response = UpdateResponse(future)
+        val collection = mongodb.getCollection(AUTH_COLLECTION)
+        collection.updateOne(eq("email", userRegistration.email), user.build()).subscribe(response)
+        val ack = future.get()
+        if (!ack.equals(true)) throw DatabaseException()
+        return RegistrationResponse(false, false)
     }
 
     fun loginAttempt(user: String, valid: Boolean) {

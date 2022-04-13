@@ -5,16 +5,18 @@ public class UserRegistration {
     private String username;
     private String password;
     private String accessCode;
+    private boolean fromEmailLink;
 
     public UserRegistration() {
 
     }
 
-    public UserRegistration(String email, String username, String password, String accessCode) {
+    public UserRegistration(String email, String username, String password, String accessCode, boolean fromEmailLink) {
         this.email = email;
         this.username = username;
         this.password = password;
         this.accessCode = accessCode;
+        this.fromEmailLink = fromEmailLink;
     }
 
     public String getUsername() {
@@ -47,5 +49,13 @@ public class UserRegistration {
 
     public void setAccessCode(String accessCode) {
         this.accessCode = accessCode;
+    }
+
+    public boolean isFromEmailLink() {
+        return fromEmailLink;
+    }
+
+    public void setFromEmailLink(boolean fromEmailLink) {
+        this.fromEmailLink = fromEmailLink;
     }
 }

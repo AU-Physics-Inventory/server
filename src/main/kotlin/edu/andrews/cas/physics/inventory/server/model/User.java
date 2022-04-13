@@ -3,6 +3,7 @@ package edu.andrews.cas.physics.inventory.server.model;
 import edu.andrews.cas.physics.inventory.server.exception.InvalidUserDocumentException;
 import org.bson.Document;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,10 @@ public class User {
                 .append("failedAttempts", 0)
                 .append("emailVerified", false)
                 .append("accessCode", null);
+    }
+
+    public User(Document userDocument) {
+        this.userDocument = userDocument;
     }
 
     public User status(UserStatus status) {
@@ -45,7 +50,7 @@ public class User {
 
     public User roles(List<String> roles) {
         if (roles == null) roles = new ArrayList<>();
-        userDocument.append("password", roles);
+        userDocument.append("roles", roles);
         return this;
     }
 
@@ -68,6 +73,50 @@ public class User {
                 && this.userDocument.containsKey("salt"))
             return this.userDocument;
         throw new InvalidUserDocumentException();
+    }
+
+    public UserStatus getStatus() {
+        return userDocument.get("status", UserStatus.class);
+    }
+
+    public String getUsername() {
+        return userDocument.getString("username");
+    }
+
+    public String getEmail() {
+        return userDocument.getString("email");
+    }
+
+    public String getPassword() {
+        return userDocument.getString("password");
+    }
+
+    public String getSalt() {
+        return userDocument.getString("salt");
+    }
+
+    public List<String> getRoles() {
+        return userDocument.getList("roles", String.class);
+    }
+
+    public String getAccessCode() {
+        return userDocument.getString("accessCode");
+    }
+
+    public boolean isEmailVerified() {
+        return userDocument.getBoolean("emailVerified");
+    }
+
+    public LocalDateTime getLastAuthenticationAttempt() {
+        return userDocument.get("lastAttempt", LocalDateTime.class);
+    }
+
+    public LocalDateTime getLastAuthenticationSuccess() {
+        return userDocument.get("lastSuccess", LocalDateTime.class);
+    }
+
+    public int getNumFailedAuthenticationAttempts() {
+        return userDocument.getInteger("failedAttempts");
     }
 }
 
