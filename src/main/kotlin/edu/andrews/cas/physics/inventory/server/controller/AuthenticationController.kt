@@ -1,4 +1,4 @@
-package edu.andrews.cas.physics.inventory.server.controllers
+package edu.andrews.cas.physics.inventory.server.controller
 
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
 import edu.andrews.cas.physics.inventory.server.request.UserLogin
@@ -24,7 +24,7 @@ class AuthenticationController @Autowired constructor(private val authentication
     @PostMapping("/login")
     fun  login(@RequestBody userLogin: UserLogin) : ResponseEntity<AuthorizationToken> {
         logger.info("[Auth Controller] Login request received for user: {}", userLogin.username)
-        val token = this.authenticationService.authenticateUser(userLogin);
+        val token = this.authenticationService.authenticateUser(userLogin)
         return if (token == null) {
             logger.info("[Auth Controller] Unable to log in user {}", userLogin.username)
             ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
@@ -53,6 +53,6 @@ class AuthenticationController @Autowired constructor(private val authentication
     }
 
     companion object {
-        private val logger: Logger = LogManager.getLogger();
+        private val logger: Logger = LogManager.getLogger()
     }
 }

@@ -1,4 +1,4 @@
-package edu.andrews.cas.physics.inventory.server.utils
+package edu.andrews.cas.physics.inventory.server.util
 
 import edu.andrews.cas.physics.inventory.server.interceptor.AuthenticationInterceptor
 import io.jsonwebtoken.SignatureAlgorithm

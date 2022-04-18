@@ -12,7 +12,7 @@ import edu.andrews.cas.physics.inventory.server.reactive.FindOneAndUpdateRespons
 import edu.andrews.cas.physics.inventory.server.reactive.InsertOneResponse
 import edu.andrews.cas.physics.inventory.server.reactive.UpdateResponse
 import edu.andrews.cas.physics.inventory.server.response.RegistrationResponse
-import edu.andrews.cas.physics.inventory.server.utils.Constants
+import edu.andrews.cas.physics.inventory.server.util.Constants
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.bson.Document

@@ -1,4 +1,4 @@
-package edu.andrews.cas.physics.inventory.server.controllers
+package edu.andrews.cas.physics.inventory.server.controller
 
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyRegisteredException
 import edu.andrews.cas.physics.inventory.server.model.User
