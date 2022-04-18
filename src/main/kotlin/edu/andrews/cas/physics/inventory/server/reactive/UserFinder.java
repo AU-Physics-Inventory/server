@@ -1,6 +1,6 @@
 package edu.andrews.cas.physics.inventory.server.reactive;
 
-import edu.andrews.cas.physics.inventory.server.model.User;
+import edu.andrews.cas.physics.inventory.server.repository.model.User;
 import org.bson.Document;
 import org.reactivestreams.Subscription;
 

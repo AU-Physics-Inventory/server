@@ -1,11 +1,10 @@
 package edu.andrews.cas.physics.inventory.server.service
 
 import edu.andrews.cas.physics.inventory.server.dao.AdminDAO
-import edu.andrews.cas.physics.inventory.server.exception.AlreadyRegisteredException
-import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
-import edu.andrews.cas.physics.inventory.server.model.User
+import edu.andrews.cas.physics.inventory.server.repository.model.User
 import edu.andrews.cas.physics.inventory.server.model.UserStatus
 import edu.andrews.cas.physics.inventory.server.request.UserInvitation
+import edu.andrews.cas.physics.inventory.server.request.UserRole
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -26,19 +25,32 @@ class AdminService @Autowired constructor(private val adminDAO: AdminDAO, privat
             .password(null)
             .salt(null)
             .build()
-        try {
-            adminDAO.register(user)
-            emailService.sendRegistrationEmail(userInvitation.email, accessCode)
-        } catch (e: DatabaseException) {
-            throw e
-        } catch (e: AlreadyRegisteredException) {
-            throw e
-        }
+        adminDAO.register(user)
+        emailService.sendRegistrationEmail(userInvitation.email, accessCode)
         return accessCode
     }
 
     private fun generateAccessCode(): String {
         return RandomStringUtils.randomAlphanumeric(6)
+    }
+
+    fun addUserRole(userRole: UserRole) {
+        logger.info("[Admin Service] Handling request to add role '{}' to user '{}'", userRole.role, userRole.username)
+        adminDAO.addUserRole(userRole)
+    }
+
+    fun removeUserRole(userRole: UserRole) {
+        logger.info("[Admin Service] Handling request to remove role '{}' from user '{}'", userRole.role, userRole.username)
+        adminDAO.removeUserRole(userRole)
+    }
+
+    fun changeUserStatus(user: String, status: UserStatus) {
+        logger.info("[Admin Service] Handling request to set status for user '{}' as '{}'", user, status)
+        adminDAO.setUserStatus(user, status)
+    }
+
+    fun getUsers(): List<edu.andrews.cas.physics.inventory.server.model.User> {
+        return adminDAO.getUsers().map { u -> edu.andrews.cas.physics.inventory.server.model.User(u) }.toList()
     }
 
     companion object {

@@ -1,8 +1,10 @@
 package edu.andrews.cas.physics.inventory.server.controllers
 
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyRegisteredException
+import edu.andrews.cas.physics.inventory.server.model.User
+import edu.andrews.cas.physics.inventory.server.model.UserStatus
 import edu.andrews.cas.physics.inventory.server.request.UserInvitation
-import edu.andrews.cas.physics.inventory.server.request.UserRoles
+import edu.andrews.cas.physics.inventory.server.request.UserRole
 import edu.andrews.cas.physics.inventory.server.service.AdminService
 import edu.andrews.cas.physics.inventory.server.service.AuthenticationService
 import org.apache.logging.log4j.LogManager
@@ -39,14 +41,37 @@ class AdminController @Autowired constructor(private val adminService: AdminServ
     }
 
     @PostMapping("/admin/addUserRole")
-    fun addUserRoles(@RequestBody userRoles: UserRoles) {
-        logger.info("[Admin Controller] Received request to add roles to user {}", userRoles.username)
+    fun addUserRole(@RequestBody userRole: UserRole) : ResponseEntity<Any> {
+        logger.info("[Admin Controller] Received request to add role '{}' to user '{}'", userRole.role, userRole.username)
+        adminService.addUserRole(userRole)
+        return ResponseEntity.accepted().build()
+    }
+
+    @PostMapping("/admin/removeUserRole")
+    fun removeUserRole(@RequestBody userRole: UserRole) : ResponseEntity<Any> {
+        logger.info("[Admin Controller] Received request to remove role '{}' from user '{}'", userRole.role, userRole.username)
+        adminService.removeUserRole(userRole)
+        return ResponseEntity.accepted().build()
     }
 
     @GetMapping("/admin/logoutUser")
     fun logoutUser(@RequestParam user: String) : ResponseEntity<Any> {
         return if (authService.logout(user)) ResponseEntity.ok().build()
         else ResponseEntity.internalServerError().build()
+    }
+
+    @GetMapping("/admin/changeUserStatus")
+    fun changeUserStatus(@RequestParam user: String, @RequestParam status: UserStatus) : ResponseEntity<Any> {
+        logger.info("[Admin Controller] Received request to set status for user '{}' as '{}'", user, status)
+        if (status == UserStatus.LOCKED || status == UserStatus.PENDING) return ResponseEntity.badRequest().body("Administrators are only able to activate or deactivate users.")
+        adminService.changeUserStatus(user, status)
+        return ResponseEntity.accepted().build()
+    }
+
+    @GetMapping("/admin/users")
+    fun getUsers() : ResponseEntity<List<User>> {
+        logger.info("[Admin Controller] Received request to retrieve all user documents")
+        return ResponseEntity.ok(adminService.getUsers())
     }
 
     companion object {

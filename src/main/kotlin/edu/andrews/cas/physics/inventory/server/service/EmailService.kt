@@ -4,7 +4,7 @@ import edu.andrews.cas.physics.inventory.server.request.UserRegistration
 import edu.andrews.cas.physics.inventory.server.dao.UserDAO
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyVerifiedException
 import edu.andrews.cas.physics.inventory.server.exception.NoSuchUserException
-import edu.andrews.cas.physics.inventory.server.model.User
+import edu.andrews.cas.physics.inventory.server.repository.model.User
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger

@@ -3,7 +3,7 @@ package edu.andrews.cas.physics.inventory.server.dao
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Updates.set
 import com.mongodb.reactivestreams.client.MongoDatabase
-import edu.andrews.cas.physics.inventory.server.model.User
+import edu.andrews.cas.physics.inventory.server.repository.model.User
 import edu.andrews.cas.physics.inventory.server.reactive.UserFinder
 import edu.andrews.cas.physics.inventory.server.reactive.FindOneAndUpdateResponse
 import org.apache.logging.log4j.LogManager
