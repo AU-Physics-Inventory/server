@@ -8,9 +8,7 @@ import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 import java.io.File
 import java.nio.charset.Charset
 
@@ -24,18 +22,18 @@ class EmailController @Autowired constructor(private val emailService: EmailServ
             emailService.verifyEmail(username)
             FileUtils
                 .readFileToString(
-                    File(ClassLoader.getSystemResource("templates/email_verification_successful.html").toURI()),
+                    File(ClassLoader.getSystemResource("templates/web/email_verification_successful.html").toURI()),
                     Charset.forName("UTF-8"))
         } catch (e: AlreadyVerifiedException) {
             FileUtils
                 .readFileToString(
-                    File(ClassLoader.getSystemResource("templates/email_already_verified.html").toURI()),
+                    File(ClassLoader.getSystemResource("templates/web/email_already_verified.html").toURI()),
                     Charset.forName("UTF-8"))
         }
     }
 
-    @GetMapping("/resendWelcomeEmail")
-    fun resendWelcomeEmail(@RequestParam username: String) : ResponseEntity<Any> {
+    @PostMapping("/resendWelcomeEmail")
+    fun resendWelcomeEmail(@RequestBody username: String) : ResponseEntity<Any> {
         logger.info("[Email Controller] Received request to resend welcome email for {}", username)
         emailService.resendEmailVerificationEmail(username)
         return ResponseEntity.accepted().build()

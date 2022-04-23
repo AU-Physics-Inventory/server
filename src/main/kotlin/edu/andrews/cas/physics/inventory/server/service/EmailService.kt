@@ -27,12 +27,11 @@ class EmailService @Autowired constructor(private val mailSession: Session,
           @Qualifier("configProperties") private val config: Properties,
           @Qualifier("emailProperties") private val emailConfig: Properties){
     fun sendEmailVerificationEmail(userRegistration: UserRegistration) {
-        return
         logger.info("[Email Service] Sending welcome email to user {}", userRegistration.username)
         val msg = MimeMessage(mailSession)
         val template = FileUtils
             .readFileToString(
-                File(ClassLoader.getSystemResource("templates/welcome_email.html").toURI()),
+                File(ClassLoader.getSystemResource("templates/email/welcome_email.html").toURI()),
                 Charset.forName("UTF-8"))
         val htmlString = template.replace(
             "{{URL}}",
@@ -68,7 +67,7 @@ class EmailService @Autowired constructor(private val mailSession: Session,
         val msg = MimeMessage(mailSession)
         val template = FileUtils
             .readFileToString(
-                File(ClassLoader.getSystemResource("templates/preregistered_user_registration_success_email.html").toURI()),
+                File(ClassLoader.getSystemResource("templates/email/preregistered_user_registration_success_email.html").toURI()),
                 Charset.forName("UTF-8"))
         msg.setFrom(validateEmailAddress(emailConfig.getProperty("mail.from")))
         msg.setRecipient(Message.RecipientType.TO, validateEmailAddress(emailAddress))
@@ -96,12 +95,11 @@ class EmailService @Autowired constructor(private val mailSession: Session,
     }
 
     private fun sendVerificationSuccessEmail(emailAddress: String) {
-        return
         logger.info("[Email Service] Sending verification success email to address {}", emailAddress)
         val msg = MimeMessage(mailSession)
         val template = FileUtils
             .readFileToString(
-                File(ClassLoader.getSystemResource("templates/email_verification_success_email.html").toURI()),
+                File(ClassLoader.getSystemResource("templates/email/email_verification_success_email.html").toURI()),
                 Charset.forName("UTF-8"))
         msg.setFrom(validateEmailAddress(emailConfig.getProperty("mail.from")))
         msg.setRecipient(Message.RecipientType.TO, validateEmailAddress(emailAddress))
@@ -121,6 +119,11 @@ class EmailService @Autowired constructor(private val mailSession: Session,
 
     private fun isUserVerified(user: User) : Boolean {
         return user.isEmailVerified
+    }
+
+    fun sendPasswordResetEmail(email: String) {
+        return
+        TODO("Not yet implemented")
     }
 
     companion object {
