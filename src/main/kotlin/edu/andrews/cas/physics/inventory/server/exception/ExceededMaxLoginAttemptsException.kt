@@ -1,5 +1,3 @@
 package edu.andrews.cas.physics.inventory.server.exception
 
-class ExceededMaxLoginAttemptsException : RuntimeException() {
-
-}
+class ExceededMaxLoginAttemptsException : RuntimeException()
