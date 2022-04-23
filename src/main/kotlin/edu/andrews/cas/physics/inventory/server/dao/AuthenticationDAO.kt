@@ -3,14 +3,14 @@ package edu.andrews.cas.physics.inventory.server.dao
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Updates.*
 import com.mongodb.reactivestreams.client.MongoDatabase
-import edu.andrews.cas.physics.inventory.server.request.UserRegistration
 import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
 import edu.andrews.cas.physics.inventory.server.exception.RegistrationNotFoundException
-import edu.andrews.cas.physics.inventory.server.repository.model.User
 import edu.andrews.cas.physics.inventory.server.model.UserStatus
 import edu.andrews.cas.physics.inventory.server.reactive.FindOneAndUpdateResponse
 import edu.andrews.cas.physics.inventory.server.reactive.InsertOneResponse
 import edu.andrews.cas.physics.inventory.server.reactive.UpdateResponse
+import edu.andrews.cas.physics.inventory.server.repository.model.User
+import edu.andrews.cas.physics.inventory.server.request.UserRegistration
 import edu.andrews.cas.physics.inventory.server.response.RegistrationResponse
 import edu.andrews.cas.physics.inventory.server.util.Constants
 import org.apache.logging.log4j.LogManager
@@ -55,11 +55,11 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
         val users = userDAO.findUserByEmail(userRegistration.email).get()
         if (users.isEmpty() || !users[0].accessCode.equals(userRegistration.accessCode)) throw RegistrationNotFoundException()
         if (userDAO.findUserByName(userRegistration.username).get().isNotEmpty()) return RegistrationResponse(true, false)
-        val user = users[0].username(userRegistration.username).password(userRegistration.password).salt(salt).status(UserStatus.ACTIVE)
+        val user = users[0].username(userRegistration.username).password(userRegistration.password).salt(salt).status(UserStatus.ACTIVE).emailVerified(userRegistration.isFromEmailLink)
         val future = CompletableFuture<Boolean>()
         val response = UpdateResponse(future)
         val collection = mongodb.getCollection(AUTH_COLLECTION)
-        collection.updateOne(eq("email", userRegistration.email), user.build()).subscribe(response)
+        collection.replaceOne(eq("email", userRegistration.email), user.build()).subscribe(response)
         val ack = future.get()
         if (!ack.equals(true)) throw DatabaseException()
         return RegistrationResponse(false, false)
@@ -98,9 +98,28 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
     }
 
     fun findUser(username: String): User? {
+        logger.info("[Auth DAO] Finding user with username: {}", username)
         val future = userDAO.findUserByName(username)
         val users = future.get()
         return if (users.isNotEmpty()) users[0] else null
+    }
+
+    fun setPassword(user: String, password: String, salt: String) {
+        logger.info("[Auth DAO] Setting password for user: {}", user)
+        val future = CompletableFuture<Boolean>()
+        val response = UpdateResponse(future)
+        val collection = mongodb.getCollection(AUTH_COLLECTION)
+        collection.updateOne(eq("username", user), combine(set("password", password), set("salt", salt))).subscribe(response)
+        future.whenCompleteAsync { _, _ ->  }
+    }
+
+    fun unlockAccount(user: String) {
+        logger.info("[Auth DAO] Unlocking account for user: {}", user)
+        val future = CompletableFuture<Boolean>()
+        val response = UpdateResponse(future)
+        val collection = mongodb.getCollection(AUTH_COLLECTION)
+        collection.updateOne(eq("username", user), set("status", UserStatus.ACTIVE.name))
+        future.whenCompleteAsync { _, _ ->  }
     }
 
     companion object {

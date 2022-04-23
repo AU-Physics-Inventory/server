@@ -5,6 +5,7 @@ import edu.andrews.cas.physics.inventory.server.request.UserLogin
 import edu.andrews.cas.physics.inventory.server.service.AuthenticationService
 import edu.andrews.cas.physics.inventory.server.request.UserRegistration
 import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
+import edu.andrews.cas.physics.inventory.server.model.IdentificationType
 import edu.andrews.cas.physics.inventory.server.response.ErrorResponse
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -13,10 +14,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.*
 
 @Controller
 class AuthenticationController @Autowired constructor(private val authenticationService: AuthenticationService) {
@@ -45,11 +43,27 @@ class AuthenticationController @Autowired constructor(private val authentication
         }
     }
 
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     fun logout(@RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken) : ResponseEntity<Any> {
         logger.info("[Auth Controller] Logging out user with jwt {}", jwt)
         return if (authenticationService.logout(jwt)) ResponseEntity.ok().build()
         else ResponseEntity.internalServerError().build()
+    }
+
+    @GetMapping("/resetPassword")
+    fun resetPassword(@RequestParam("id") userIdentification: String, @RequestParam("type") identificationType: String) : ResponseEntity<Any> {
+        logger.info("[Auth Controller] Received password reset GET request", identificationType, userIdentification)
+        if (identificationType != "email" && identificationType != "username") return ResponseEntity.badRequest().body("Type must be either 'email' or 'username'")
+        logger.info("[Auth Controller] Requesting a password reset for user with {}: {}", identificationType, userIdentification)
+        authenticationService.resetPassword(userIdentification, identificationType)
+        return ResponseEntity.accepted().build()
+    }
+
+    @PostMapping("/resetPassword")
+    fun resetPassword(userLogin: UserLogin) : ResponseEntity<Any> {
+        logger.info("[Auth Controller] Received password reset POST request for user: {}", userLogin.username)
+        authenticationService.setPassword(userLogin.username, userLogin.password)
+        return ResponseEntity.accepted().build()
     }
 
     companion object {
