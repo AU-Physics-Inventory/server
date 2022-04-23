@@ -3,6 +3,7 @@ package edu.andrews.cas.physics.inventory.server.service
 import edu.andrews.cas.physics.inventory.server.dao.AdminDAO
 import edu.andrews.cas.physics.inventory.server.repository.model.User
 import edu.andrews.cas.physics.inventory.server.model.UserStatus
+import edu.andrews.cas.physics.inventory.server.request.ChangeUserStatusRequest
 import edu.andrews.cas.physics.inventory.server.request.UserInvitation
 import edu.andrews.cas.physics.inventory.server.request.UserRole
 import org.apache.commons.lang3.RandomStringUtils
@@ -44,13 +45,13 @@ class AdminService @Autowired constructor(private val adminDAO: AdminDAO, privat
         adminDAO.removeUserRole(userRole)
     }
 
-    fun changeUserStatus(user: String, status: UserStatus) {
-        logger.info("[Admin Service] Handling request to set status for user '{}' as '{}'", user, status)
-        adminDAO.setUserStatus(user, status)
+    fun changeUserStatus(changeUserStatusRequest: ChangeUserStatusRequest) {
+        logger.info("[Admin Service] Handling request to set status for user '{}' as '{}'", changeUserStatusRequest.username, changeUserStatusRequest.status)
+        adminDAO.setUserStatus(changeUserStatusRequest.username, changeUserStatusRequest.status)
     }
 
-    fun getUsers(): List<edu.andrews.cas.physics.inventory.server.model.User> {
-        return adminDAO.getUsers().map { u -> edu.andrews.cas.physics.inventory.server.model.User(u) }.toList()
+    fun getUsers(role: String?): List<edu.andrews.cas.physics.inventory.server.model.User> {
+        return adminDAO.getUsers(role).map { u -> edu.andrews.cas.physics.inventory.server.model.User(u) }.toList()
     }
 
     companion object {
