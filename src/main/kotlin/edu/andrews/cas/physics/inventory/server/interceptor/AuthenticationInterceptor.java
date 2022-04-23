@@ -37,7 +37,14 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         logger.info("[Auth Interceptor -- Pre-Handle] Checking request authentication at endpoint {}", request.getRequestURI());
         var requestURI = request.getRequestURI();
         if (requestURI.startsWith("/admin")) return isUserAdmin(request, response);
+        if (requestURI.startsWith("/user")) return isUserLoggedIn(request, response);
         return true;
+    }
+
+    private boolean isUserLoggedIn(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        boolean isAuthenticated = isAuthenticated(request).getFirst();
+        if (!isAuthenticated) response.sendError(401, "User must be logged in.");
+        return isAuthenticated;
     }
 
     @Override
