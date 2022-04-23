@@ -2,14 +2,15 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8"> <!-- utf-8 works for most cases -->
-    <meta name="viewport" content="width=device-width"> <!-- Forcing initial-scale shouldn't be necessary -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Use the latest (edge) version of IE rendering engine -->
+    <meta content="width=device-width" name="viewport"> <!-- Forcing initial-scale shouldn't be necessary -->
+    <meta content="IE=edge" http-equiv="X-UA-Compatible"> <!-- Use the latest (edge) version of IE rendering engine -->
     <meta name="x-apple-disable-message-reformatting">  <!-- Disable auto-scale in iOS 10 Mail entirely -->
     <title></title> <!-- The title tag shows in email notifications, like Android 4.4. -->
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@200;300;400;500;600;700&display=swap"
+          rel="stylesheet">
 
     <!-- CSS Reset : BEGIN -->
     <style>
@@ -53,7 +54,7 @@
 
         /* What it does: Uses a better rendering method when resizing images in IE. */
         img {
-            -ms-interpolation-mode:bicubic;
+            -ms-interpolation-mode: bicubic;
         }
 
         /* What it does: Prevents Windows 10 Mail from underlining links despite inline CSS. Styles for underlined links should be inline. */
@@ -62,7 +63,7 @@
         }
 
         /* What it does: A work-around for email clients meddling in triggered links. */
-        *[x-apple-data-detectors],  /* iOS */
+        *[x-apple-data-detectors], /* iOS */
         .unstyle-auto-detected-links *,
         .aBn {
             border-bottom: 0 !important;
@@ -100,12 +101,14 @@
                 min-width: 320px !important;
             }
         }
+
         /* iPhone 6, 6S, 7, 8, and X */
         @media only screen and (min-device-width: 375px) and (max-device-width: 413px) {
             u ~ div .email-container {
                 min-width: 375px !important;
             }
         }
+
         /* iPhone 6+, 7+, and 8+ */
         @media only screen and (min-device-width: 414px) {
             u ~ div .email-container {
@@ -121,85 +124,97 @@
     <!-- Progressive Enhancements : BEGIN -->
     <style>
 
-        .primary{
+        .primary {
             background: #17bebb;
         }
-        .bg_white{
+
+        .bg_blue {
             background: #f7fafa;
         }
-        .bg_light{
+
+        .bg_gold {
             background: #CBB677;
         }
-        .bg_black{
+
+        .bg_black {
             background: #000000;
         }
-        .bg_dark{
-            background: rgba(0,0,0,.8);
+
+        .bg_dark {
+            background: rgba(0, 0, 0, .8);
         }
-        .email-section{
-            padding:2.5em;
+
+        .email-section {
+            padding: 2.5em;
         }
 
         /*BUTTON*/
-        .btn{
+        .btn {
             padding: 10px 15px;
             display: inline-block;
         }
-        .btn.btn-primary{
+
+        .btn.btn-primary {
             border-radius: 5px;
             background: #004a80;
             color: #004a80;
         }
-        .btn.btn-white{
+
+        .btn.btn-white {
             border-radius: 5px;
             background: #ffffff;
             color: #000000;
         }
-        .btn.btn-white-outline{
+
+        .btn.btn-white-outline {
             border-radius: 5px;
             background: transparent;
             border: 1px solid #fff;
             color: #fff;
         }
-        .btn.btn-black-outline{
+
+        .btn.btn-black-outline {
             border-radius: 0px;
             background: transparent;
             border: 2px solid #000;
             color: #000;
             font-weight: 700;
         }
-        .btn-custom{
-            color: rgba(0,0,0,.3);
+
+        .btn-custom {
+            color: rgba(0, 0, 0, .3);
             text-decoration: underline;
         }
 
-        h1,h2,h3,h4,h5,h6{
+        h1, h2, h3, h4, h5, h6 {
             font-family: 'IBM Plex Sans', sans-serif;
             color: #000000;
             margin-top: 0;
             font-weight: 400;
         }
 
-        body{
+        body {
             font-family: 'IBM Plex Sans', sans-serif;
             font-weight: 400;
             font-size: 15px;
             line-height: 1.8;
-            color: rgba(0,0,0,.4);
+            color: rgba(0, 0, 0, .4);
         }
 
-        a{
-            color: #17bebb;
+        a {
+            color: #004a80;
         }
 
-        table{
+        table {
         }
+
         /*LOGO*/
 
-        .logo h1{
+        .logo h1 {
             margin: 0;
         }
-        .logo h1 a{
+
+        .logo h1 a {
             color: #17bebb;
             font-size: 24px;
             font-weight: 700;
@@ -207,73 +222,84 @@
         }
 
         /*HERO*/
-        .hero{
+        .hero {
             position: relative;
             z-index: 0;
         }
 
-        .hero .text{
-            color: rgba(0,0,0,.3);
+        .hero .text {
+            color: rgba(0, 0, 0, .3);
         }
-        .hero .text h2{
-            color: rgba(0,0,0,.6);
+
+        .hero .text h2 {
+            color: rgba(0, 0, 0, .6);
             font-size: 34px;
             margin-bottom: 0;
             font-weight: 300;
             line-height: 1.4;
         }
-        .hero .text h3{
+
+        .hero .text h3 {
             font-size: 24px;
             font-weight: 300;
         }
-        .hero .text h2 span{
+
+        .hero .text h2 span {
             font-weight: 600;
             color: #000;
         }
 
-        .text-author{
-            border: 1px solid rgba(0,0,0,.05);
+        .text-author {
+            border: 1px solid rgba(0, 0, 0, .05);
             max-width: 50%;
             margin: 0 auto;
             padding: 2em;
         }
-        .text-author img{
+
+        .text-author img {
             border-radius: 50%;
             padding-bottom: 20px;
         }
-        .text-author h3{
+
+        .text-author h3 {
             margin-bottom: 0;
         }
-        ul.social{
+
+        ul.social {
             padding: 0;
         }
-        ul.social li{
+
+        ul.social li {
             display: inline-block;
             margin-right: 10px;
         }
 
         /*FOOTER*/
 
-        .footer{
-            border-top: 1px solid rgba(0,0,0,.05);
-            color: rgba(0,0,0,0.7);
+        .footer {
+            border-top: 1px solid rgba(0, 0, 0, .05);
+            color: rgba(0, 0, 0, 0.7);
         }
-        .footer .heading{
+
+        .footer .heading {
             color: #000;
             font-size: 20px;
         }
-        .footer ul{
+
+        .footer ul {
             margin: 0;
             padding: 0;
         }
-        .footer ul li{
+
+        .footer ul li {
             list-style: none;
             margin-bottom: 0;
             margin-top: -7px;
             font-weight: 400;
         }
-        .footer ul li a{
-            color: rgba(0,0,0,1);
+
+        .footer ul li a {
+            color: rgba(0, 0, 0, 1);
         }
 
 
@@ -288,33 +314,36 @@
 
 </head>
 
-<body width="100%" style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly; background-color: #f1f1f1;">
+<body style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly; background-color: #f1f1f1;" width="100%">
 <div style="width: 100%; background-color: #f1f1f1; text-align: center;">
     <div style="display: none; font-size: 1px;max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: sans-serif;">
         &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
     </div>
-    <div style="max-width: 600px; margin: 0 auto;" class="email-container">
+    <div class="email-container" style="max-width: 600px; margin: 0 auto;">
         <!-- BEGIN BODY -->
-        <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
+        <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin: auto;"
+               width="100%">
             <tr>
-                <td valign="top" class="bg_white" style="padding: 1em 2.5em 0 2.5em;">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <td class="bg_white" style="padding: 1em 2.5em 0 2.5em;" valign="top">
+                    <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
                         <tr>
                             <td class="logo" style="text-align: center;">
                                 <!--<h1><a href="#">Physics Inventory</a></h1>-->
-                                <img src="https://795h2gwn-dev.physicsinventory.gq/logos/B_Physics%20Inventory-05.png" alt="Physics Inventory" style="width: 200px; max-width: 800px; height: auto; margin: auto; display: block;">
+                                <img alt="Physics Inventory"
+                                     src="https://795h2gwn-dev.physicsinventory.gq/logos/B_Physics%20Inventory-05.png"
+                                     style="width: 200px; max-width: 800px; height: auto; margin: auto; display: block;">
                             </td>
                         </tr>
                     </table>
                 </td>
             </tr><!-- end tr -->
             <tr>
-                <td valign="middle" class="hero bg_white" style="padding: 2em 0 4em 0;">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <td class="hero bg_white" style="padding: 2em 0 4em 0;" valign="middle">
+                    <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="100%">
                         <tr>
                             <td style="text-align: center; padding: 2em 3em 3em 3em;">
                                 <div class="text">
-                                    <h2>E-mail already verified</h2>
+                                    <h2>Thanks for registering!</h2>
                                 </div>
                             </td>
                         </tr>
@@ -322,6 +351,55 @@
                 </td>
             </tr><!-- end tr -->
             <!-- 1 Column Text + Button : END -->
+        </table>
+        <table role="presentation" style="margin: 0 auto; width: 100%; border: 0; border-spacing: 0">
+            <tr>
+                <td class="bg_light footer email-section" style="vertical-align: middle;">
+                    <table>
+                        <tr>
+                            <td style="padding-top: 0; vertical-align: top; width: 33.333%;">
+                                <table role="presentation"
+                                       style="margin: 0 auto; width: 100%; border: 0; border-spacing: 0">
+                                    <tr>
+                                        <td style="text-align: center; horiz-align: center;">
+                                            <img alt="Physics Inventory"
+                                                 src="https://795h2gwn-dev.physicsinventory.gq/logos/DepartmentPhysics_AU_V_Black.png"
+                                                 style="width: 40vw; max-width: 200px; height: auto; margin: auto;">
+                                        </td>
+                                        <td style="text-align: left; padding-left: 5px; padding-right: 5px; width: inherit; display: block; horiz-align: center;">
+                                            <ul>
+                                                <li><span class="text">Physics Inventory</span></li>
+                                                <li><span class="text">Haughey Hall 211</span></li>
+                                                <li><span class="text">Andrews University</span></li>
+                                                <li><span class="text">Berrien Springs, MI 49104-0380</span></li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr><!-- end: tr -->
+        </table>
+        <table role="presentation" style="margin: 0 auto; width: 100%; border: 0; border-spacing: 0">
+            <tr>
+                <td class="bg_light footer" style="vertical-align: middle;">
+                    <table>
+                        <tr>
+                            <td style="padding-top: 0; vertical-align: top; width: 33.333%;">
+                                <table role="presentation"
+                                       style="margin: 0 auto; width: 100%; border: 0; border-spacing: 0">
+                                    <tr style="text-align: center; padding-left: 5px; padding-right: 5px;">
+                                        <a href="mailto://physics@andrews.edu">physics@andrews.edu</a> // <a
+                                            href="tel://2694713430">(269) 471-3430</a>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr><!-- end: tr -->
         </table>
     </div>
 </div>
