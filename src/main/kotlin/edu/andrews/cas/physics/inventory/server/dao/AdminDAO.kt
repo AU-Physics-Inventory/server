@@ -13,6 +13,7 @@ import edu.andrews.cas.physics.inventory.server.repository.model.User
 import edu.andrews.cas.physics.inventory.server.request.UserRole
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.bson.BsonString
 import org.bson.Document
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -60,12 +61,13 @@ class AdminDAO @Autowired constructor(private val mongodb: MongoDatabase, privat
         future.whenCompleteAsync { _, _ -> }
     }
 
-    fun getUsers(): List<User> {
-        logger.info("[Admin DAO] Retrieving list of all users")
+    fun getUsers(role: String?): List<User> {
+        logger.info("[Admin DAO] Retrieving list of all users {}", role)
         val future = CompletableFuture<List<User>>()
         val response = UserFinder(future)
         val collection = mongodb.getCollection(USER_COLLECTION)
-        collection.find().subscribe(response)
+        if (role == null) collection.find().subscribe(response)
+        else collection.find(eq("roles", BsonString(role))).subscribe(response)
         return future.get()
     }
 
