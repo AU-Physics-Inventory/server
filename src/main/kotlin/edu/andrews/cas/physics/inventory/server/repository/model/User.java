@@ -108,11 +108,13 @@ public class User {
     }
 
     public String getLastAuthenticationAttempt() {
-        return userDocument.getDate("lastAttempt").toString();
+        var date =  userDocument.getDate("lastAttempt");
+        return date == null ? null : date.toString();
     }
 
     public String getLastAuthenticationSuccess() {
-        return userDocument.getDate("lastSuccess").toString();
+        var date = userDocument.getDate("lastSuccess");
+        return date == null ? null : date.toString();
     }
 
     public int getNumFailedAuthenticationAttempts() {
