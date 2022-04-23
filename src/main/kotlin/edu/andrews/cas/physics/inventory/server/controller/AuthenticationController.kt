@@ -5,7 +5,6 @@ import edu.andrews.cas.physics.inventory.server.request.UserLogin
 import edu.andrews.cas.physics.inventory.server.service.AuthenticationService
 import edu.andrews.cas.physics.inventory.server.request.UserRegistration
 import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
-import edu.andrews.cas.physics.inventory.server.model.IdentificationType
 import edu.andrews.cas.physics.inventory.server.response.ErrorResponse
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
