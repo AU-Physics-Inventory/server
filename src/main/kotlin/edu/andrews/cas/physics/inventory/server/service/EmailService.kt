@@ -1,10 +1,10 @@
 package edu.andrews.cas.physics.inventory.server.service
 
-import edu.andrews.cas.physics.inventory.server.request.UserRegistration
 import edu.andrews.cas.physics.inventory.server.dao.UserDAO
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyVerifiedException
 import edu.andrews.cas.physics.inventory.server.exception.NoSuchUserException
 import edu.andrews.cas.physics.inventory.server.repository.model.User
+import edu.andrews.cas.physics.inventory.server.request.UserRegistration
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -22,28 +22,26 @@ import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 
 @Service
-class EmailService @Autowired constructor(private val mailSession: Session,
-                                          private val userDAO: UserDAO,
-          @Qualifier("configProperties") private val config: Properties,
-          @Qualifier("emailProperties") private val emailConfig: Properties){
+class EmailService @Autowired constructor(
+    private val mailSession: Session,
+    private val userDAO: UserDAO,
+    @Qualifier("configProperties") private val config: Properties,
+    @Qualifier("emailProperties") private val emailConfig: Properties
+) {
     fun sendEmailVerificationEmail(userRegistration: UserRegistration) {
         logger.info("[Email Service] Sending welcome email to user {}", userRegistration.username)
-        val msg = MimeMessage(mailSession)
         val template = FileUtils
             .readFileToString(
                 File(ClassLoader.getSystemResource("templates/email/welcome_email.html").toURI()),
-                Charset.forName("UTF-8"))
+                Charset.forName("UTF-8")
+            )
         val htmlString = template.replace(
             "{{URL}}",
             String.format("%s/verifyEmail?username=%s", config["server.host"], userRegistration.username),
-            false)
-        logger.debug(htmlString)
-        msg.setFrom(validateEmailAddress(emailConfig.getProperty("mail.from")))
-        msg.setRecipient(Message.RecipientType.TO, validateEmailAddress(userRegistration.email))
-        msg.subject = "[Physics Inventory] Verify your e-mail"
-        msg.setContent(htmlString, "text/html")
-        msg.sentDate = Date.from(Instant.now())
-        Transport.send(msg)
+            false
+        )
+        val subject = "[Physics Inventory] Verify your e-mail"
+        sendMessage(validateEmailAddress(userRegistration.email), subject, htmlString)
     }
 
     fun resendEmailVerificationEmail(user: String) {
@@ -62,19 +60,23 @@ class EmailService @Autowired constructor(private val mailSession: Session,
         )
     }
 
+    fun sendPasswordResetEmail(email: String) {
+        return
+        TODO("Not yet implemented")
+    }
+
     fun sendPreRegisteredUserRegistrationSuccessEmail(emailAddress: String) {
         logger.info("[Email Service] Sending verification success email to address {}", emailAddress)
-        val msg = MimeMessage(mailSession)
         val template = FileUtils
             .readFileToString(
-                File(ClassLoader.getSystemResource("templates/email/preregistered_user_registration_success_email.html").toURI()),
-                Charset.forName("UTF-8"))
-        msg.setFrom(validateEmailAddress(emailConfig.getProperty("mail.from")))
-        msg.setRecipient(Message.RecipientType.TO, validateEmailAddress(emailAddress))
-        msg.subject = "Welcome to Physics Inventory"
-        msg.setContent(template, "text/html")
-        msg.sentDate = Date.from(Instant.now())
-        Transport.send(msg)
+                File(
+                    ClassLoader.getSystemResource("templates/email/preregistered_user_registration_success_email.html")
+                        .toURI()
+                ),
+                Charset.forName("UTF-8")
+            )
+        val subject = "Welcome to Physics Inventory"
+        sendMessage(validateEmailAddress(emailAddress), subject, template)
     }
 
     fun sendRegistrationEmail(email: String, accessCode: String) {
@@ -82,7 +84,7 @@ class EmailService @Autowired constructor(private val mailSession: Session,
         TODO("Not yet implemented")
     }
 
-    fun validateEmailAddress(emailAddress: String) : InternetAddress {
+    fun validateEmailAddress(emailAddress: String): InternetAddress {
         logger.info("[Email Service] Validating email address: {}", emailAddress)
         return InternetAddress.parse(emailAddress)[0]
     }
@@ -96,20 +98,16 @@ class EmailService @Autowired constructor(private val mailSession: Session,
 
     private fun sendVerificationSuccessEmail(emailAddress: String) {
         logger.info("[Email Service] Sending verification success email to address {}", emailAddress)
-        val msg = MimeMessage(mailSession)
         val template = FileUtils
             .readFileToString(
                 File(ClassLoader.getSystemResource("templates/email/email_verification_success_email.html").toURI()),
-                Charset.forName("UTF-8"))
-        msg.setFrom(validateEmailAddress(emailConfig.getProperty("mail.from")))
-        msg.setRecipient(Message.RecipientType.TO, validateEmailAddress(emailAddress))
-        msg.subject = "Welcome to Physics Inventory"
-        msg.setContent(template, "text/html")
-        msg.sentDate = Date.from(Instant.now())
-        Transport.send(msg)
+                Charset.forName("UTF-8")
+            )
+        val subject = "Welcome to Physics Inventory"
+        sendMessage(validateEmailAddress(emailAddress), subject, template)
     }
 
-    private fun isUserVerified(user: String) : Boolean {
+    private fun isUserVerified(user: String): Boolean {
         logger.info("[Email Service] Checking if user is verified")
         val documentFuture = userDAO.findUserByName(user)
         val users = documentFuture.get()
@@ -117,13 +115,18 @@ class EmailService @Autowired constructor(private val mailSession: Session,
         return users[0].isEmailVerified
     }
 
-    private fun isUserVerified(user: User) : Boolean {
+    private fun isUserVerified(user: User): Boolean {
         return user.isEmailVerified
     }
 
-    fun sendPasswordResetEmail(email: String) {
-        return
-        TODO("Not yet implemented")
+    private fun sendMessage(to: InternetAddress, subject: String, content: String, contentType: String = "text/html") {
+        val msg = MimeMessage(mailSession)
+        msg.setFrom(validateEmailAddress(emailConfig.getProperty("mail.from")))
+        msg.setRecipient(Message.RecipientType.TO, to)
+        msg.subject = subject
+        msg.setContent(content, contentType)
+        msg.sentDate = Date.from(Instant.now())
+        Transport.send(msg)
     }
 
     companion object {
