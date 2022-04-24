@@ -36,7 +36,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         logger.info("[Auth Interceptor -- Pre-Handle] Checking request authentication at endpoint {}", request.getRequestURI());
         var requestURI = request.getRequestURI();
         if (requestURI.startsWith("/admin")) return isUserAdmin(request, response);
-        if (requestURI.startsWith("/user")) return isUserLoggedIn(request, response);
+        if (requestURI.startsWith("/user") || requestURI.startsWith("/app")) return isUserLoggedIn(request, response);
         return true;
     }
 
