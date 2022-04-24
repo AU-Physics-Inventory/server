@@ -32,7 +32,7 @@ class EmailService @Autowired constructor(
         logger.info("[Email Service] Sending welcome email to user {}", userRegistration.username)
         val template = FileUtils
             .readFileToString(
-                File(ClassLoader.getSystemResource("templates/email/welcome_email.html").toURI()),
+                File(ClassLoader.getSystemResource("templates/email/verify_email.html").toURI()),
                 Charset.forName("UTF-8")
             )
         val htmlString = template.replace(
@@ -80,8 +80,32 @@ class EmailService @Autowired constructor(
     }
 
     fun sendRegistrationEmail(email: String, accessCode: String) {
-        return
-        TODO("Not yet implemented")
+        logger.info(
+            "[Email Service] Sending registration invitation to email address '{}' with access code '{}'",
+            email,
+            accessCode
+        )
+        val template = FileUtils
+            .readFileToString(
+                File(
+                    ClassLoader.getSystemResource("templates/email/registration_invitation.html")
+                        .toURI()
+                ),
+                Charset.forName("UTF-8")
+            )
+        val htmlString = template
+            .replace(
+                "{{URL}}",
+                String.format("%s/register?email=%s&accessCode=%s", config["webapp.host"], email, accessCode),
+                false
+            )
+            .replace(
+                "{{CODE}}",
+                accessCode,
+                false
+            )
+        val subject = "[Physics Inventory] Invitation to register"
+        sendMessage(validateEmailAddress(email), subject, htmlString)
     }
 
     fun validateEmailAddress(emailAddress: String): InternetAddress {
