@@ -1,7 +1,6 @@
 package edu.andrews.cas.physics.inventory.server.interceptor;
 
 import edu.andrews.cas.physics.inventory.server.auth.LoggedInUsers;
-import edu.andrews.cas.physics.inventory.server.service.AuthenticationService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import kotlin.Pair;
@@ -66,8 +65,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             String errorMsg = "Unable to authenticate admin user.";
             logger.info("[Auth Interceptor] {}", errorMsg);
             response.sendError(401, errorMsg);
-        }
-        else logger.info("[Auth Interceptor] User is admin");
+        } else logger.info("[Auth Interceptor] User is admin");
         return result;
     }
 
@@ -78,7 +76,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             if (claims == null || !loggedInUsers.contains(claims.getBody().getSubject())) throw new Exception();
             logger.info("[Auth Interceptor] User {} is authenticated", claims.getBody().getSubject());
             return new Pair<>(true, claims);
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.info("[Auth Interceptor] User is not authenticated. Either Authorization token is malformed or missing, or user is no longer logged in.");
             return new Pair<>(false, null);
         }
