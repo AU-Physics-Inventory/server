@@ -27,7 +27,7 @@ public class Quantity implements IDocumentConversion {
 
     public static Quantity fromDocument(Document d) {
         return new Quantity()
-                .value(d.getDouble("value"))
+                .value(d.getDouble("amount"))
                 .unit(Unit.lookup(d.getString("unit")));
     }
 
