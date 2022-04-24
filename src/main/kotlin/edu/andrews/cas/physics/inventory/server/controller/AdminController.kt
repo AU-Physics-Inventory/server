@@ -15,15 +15,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.*
 
 @Controller
+@RequestMapping("/admin")
 class AdminController @Autowired constructor(private val adminService: AdminService, private val authService: AuthenticationService) {
 
-    @PostMapping("/admin/user/invite")
+    @PostMapping("/user/invite")
     fun inviteUserToRegister(@RequestBody userInvitation: UserInvitation) : ResponseEntity<Any> {
         logger.info("[Admin Controller] Received request to invite user with email address {} to register", userInvitation.email)
         return try {
@@ -41,14 +39,14 @@ class AdminController @Autowired constructor(private val adminService: AdminServ
         }
     }
 
-    @PostMapping("/admin/user/addRole")
+    @PostMapping("/user/addRole")
     fun addUserRole(@RequestBody userRole: UserRole) : ResponseEntity<Any> {
         logger.info("[Admin Controller] Received request to add role '{}' to user '{}'", userRole.role, userRole.username)
         adminService.addUserRole(userRole)
         return ResponseEntity.accepted().build()
     }
 
-    @PostMapping("/admin/user/removeRole")
+    @PostMapping("/user/removeRole")
     fun removeUserRole(@RequestBody userRole: UserRole) : ResponseEntity<Any> {
         logger.info("[Admin Controller] Received request to remove role '{}' from user '{}'", userRole.role, userRole.username)
         adminService.removeUserRole(userRole)
@@ -61,7 +59,7 @@ class AdminController @Autowired constructor(private val adminService: AdminServ
         else ResponseEntity.internalServerError().build()
     }
 
-    @PostMapping("/admin/user/changeStatus")
+    @PostMapping("/user/changeStatus")
     fun changeUserStatus(@RequestBody request: ChangeUserStatusRequest) : ResponseEntity<Any> {
         logger.info("[Admin Controller] Received request to set status for user '{}' as '{}'", request.username, request.status)
         if (request.status == UserStatus.LOCKED || request.status == UserStatus.PENDING) return ResponseEntity.badRequest().body("Administrators are only able to activate or deactivate users.")
@@ -69,7 +67,7 @@ class AdminController @Autowired constructor(private val adminService: AdminServ
         return ResponseEntity.accepted().build()
     }
 
-    @GetMapping("/admin/users")
+    @GetMapping("/users")
     fun getUsers(@RequestParam("withRole", required = false) role: String?) : ResponseEntity<List<User>> {
         logger.info("[Admin Controller] Received request to retrieve all user documents {}", if (role != null && role.isNotEmpty()) String.format("with role '%s'", role) else "")
         return ResponseEntity.ok(adminService.getUsers(role))
