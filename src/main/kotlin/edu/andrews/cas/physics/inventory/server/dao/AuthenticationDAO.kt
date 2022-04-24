@@ -3,6 +3,7 @@ package edu.andrews.cas.physics.inventory.server.dao
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.Updates.*
 import com.mongodb.reactivestreams.client.MongoDatabase
+import edu.andrews.cas.physics.inventory.server.exception.AlreadyRegisteredException
 import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
 import edu.andrews.cas.physics.inventory.server.exception.RegistrationNotFoundException
 import edu.andrews.cas.physics.inventory.server.model.UserStatus
@@ -54,6 +55,7 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
         logger.info("[Auth DAO] Attempting to register a pre-registered user with access code {} and email {}", userRegistration.accessCode, userRegistration.email)
         val users = userDAO.findUserByEmail(userRegistration.email).get()
         if (users.isEmpty() || !users[0].accessCode.equals(userRegistration.accessCode)) throw RegistrationNotFoundException()
+        if (users[0].status != UserStatus.PENDING) throw AlreadyRegisteredException()
         if (userDAO.findUserByName(userRegistration.username).get().isNotEmpty()) return RegistrationResponse(true, false)
         val user = users[0].username(userRegistration.username).password(userRegistration.password).salt(salt).status(UserStatus.ACTIVE).emailVerified(userRegistration.isFromEmailLink)
         val future = CompletableFuture<Boolean>()
@@ -118,7 +120,7 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
         val future = CompletableFuture<Boolean>()
         val response = UpdateResponse(future)
         val collection = mongodb.getCollection(AUTH_COLLECTION)
-        collection.updateOne(eq("username", user), set("status", UserStatus.ACTIVE.name))
+        collection.updateOne(combine(eq("username", user), eq("status", UserStatus.LOCKED.name)), set("status", UserStatus.ACTIVE.name)).subscribe(response)
         future.whenCompleteAsync { _, _ ->  }
     }
 
