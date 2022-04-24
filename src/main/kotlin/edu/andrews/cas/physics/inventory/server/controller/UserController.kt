@@ -11,15 +11,16 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
 @Controller
+@RequestMapping("/user")
 class UserController @Autowired constructor(private val userService: UserService) {
-    @PostMapping("/user/changeEmail")
+    @PostMapping("/changeEmail")
     fun changeEmail(@RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken, @RequestBody email: String) : ResponseEntity<Any> {
         logger.info("[User Controller] Received request to change e-mail")
         userService.changeEmail(jwt, email)
         return ResponseEntity.accepted().build()
     }
 
-    @PostMapping("/user/changePassword")
+    @PostMapping("/changePassword")
     fun changePassword(@RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken, @RequestBody password: String) : ResponseEntity<Any> {
         logger.info("[User Controller] Received request to update password")
         userService.changePassword(jwt, password)
