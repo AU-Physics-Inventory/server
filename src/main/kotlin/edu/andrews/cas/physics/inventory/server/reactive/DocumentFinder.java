@@ -3,13 +3,17 @@ package edu.andrews.cas.physics.inventory.server.reactive;
 import org.bson.Document;
 import org.reactivestreams.Subscription;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class DocumentFinder extends Subscriber<Document, Document> {
+public class DocumentFinder extends Subscriber<List<Document>, Document> {
     private Subscription subscription;
+    private final ArrayList<Document> documents;
 
-    public DocumentFinder(CompletableFuture<Document> documentFuture) {
+    public DocumentFinder(CompletableFuture<List<Document>> documentFuture) {
         super(documentFuture);
+        this.documents = new ArrayList<>();
     }
 
     @Override
@@ -20,7 +24,8 @@ public class DocumentFinder extends Subscriber<Document, Document> {
 
     @Override
     public void onNext(Document d) {
-        super.future.complete(d);
+        this.documents.add(d);
+        this.subscription.request(1);
     }
 
     @Override
@@ -30,6 +35,6 @@ public class DocumentFinder extends Subscriber<Document, Document> {
 
     @Override
     public void onComplete() {
-        super.future.complete(null);
+        super.future.complete(this.documents);
     }
 }

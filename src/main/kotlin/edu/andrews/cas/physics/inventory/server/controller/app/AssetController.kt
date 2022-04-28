@@ -18,8 +18,24 @@ class AssetController @Autowired constructor(private val assetService: AssetServ
     @GetMapping("/asset")
     fun getAsset(@RequestParam id: String) : ResponseEntity<Asset> {
         logger.info("[Asset Controller] Received request for asset with id = '{}'", id)
-        val asset = assetService.getAsset(id)
-        return ResponseEntity.ok(asset)
+        val asset = assetService.getAssets(arrayListOf(id))
+        return if (asset.isEmpty()) ResponseEntity.notFound().build()
+        else ResponseEntity.ok(asset[0])
+    }
+
+    @GetMapping("/assets")
+    fun getAssets(@RequestParam ids: List<String>) : ResponseEntity<List<Asset>> {
+        logger.info("[Asset Controller] Received request for asset with id = '{}'", ids.toString())
+        val assets = assetService.getAssets(ids)
+        return ResponseEntity.ok(assets)
+    }
+
+    @GetMapping
+    fun search(@RequestParam params: Map<String, String>) : ResponseEntity<List<Asset>> {
+        logger.info("[Asset Controller] Received search request: {}", params.toString())
+        // todo catch number format exception
+        val assets = assetService.search(params)
+        return ResponseEntity.ok(assets)
     }
 
     companion object {
