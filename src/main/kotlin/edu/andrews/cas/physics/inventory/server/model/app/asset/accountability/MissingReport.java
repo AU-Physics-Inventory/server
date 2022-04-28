@@ -19,7 +19,7 @@ public record MissingReport(@BsonProperty("quantity") Quantity quantityMissing, 
 
     public static MissingReport fromDocument(Document d) {
         Quantity quantityMissing = Quantity.fromDocument((Document) d.get("quantity"));
-        LocalDate date = ConversionHelper.parseDate(d.getString("date"));
+        LocalDate date = ConversionHelper.parseDate(d.getDate("date"));
         String reportedBy = d.getString("reportedBy");
         return new MissingReport(quantityMissing, date, reportedBy);
     }

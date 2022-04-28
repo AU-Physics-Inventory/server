@@ -3,13 +3,17 @@ package edu.andrews.cas.physics.inventory.server.model.app.asset.maintenance;
 import edu.andrews.cas.physics.inventory.server.model.app.IDocumentConversion;
 import edu.andrews.cas.physics.inventory.server.util.ConversionHelper;
 import lombok.NonNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class CalibrationDetails implements IDocumentConversion {
+    private static Logger logger = LogManager.getLogger();
     private LocalDate nextDate;
     private LocalDate lastDate;
     private Long interval;
@@ -25,11 +29,12 @@ public class CalibrationDetails implements IDocumentConversion {
     private CalibrationDetails() {}
 
     public static CalibrationDetails fromDocument(Document d) {
+        logger.debug("Calibration details: {}", d);
         return new CalibrationDetails()
-                .nextDate(ConversionHelper.parseDate(d.getString("next")))
-                .lastDate(ConversionHelper.parseDate(d.getString("last")))
+                .nextDate(ConversionHelper.parseDate(d.getDate("next")))
+                .lastDate(ConversionHelper.parseDate(d.getDate("last")))
                 .interval(d.getLong("interval"))
-                .history(d.getList("history", String.class).parallelStream().map(ConversionHelper::parseDate).toList());
+                .history(d.getList("history", Date.class).parallelStream().map(ConversionHelper::parseDate).toList());
     }
 
     private CalibrationDetails nextDate(LocalDate nextDate) {

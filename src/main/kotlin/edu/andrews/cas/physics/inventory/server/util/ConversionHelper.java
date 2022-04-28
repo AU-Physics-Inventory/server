@@ -9,10 +9,13 @@ import org.bson.Document;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 
 public class ConversionHelper {
+    private static final Logger logger = LogManager.getLogger();
+
     public static URL parseURL(String url) {
         try {
             return new URL(url);
@@ -26,12 +29,13 @@ public class ConversionHelper {
         try {
             return LocalDate.parse(date);
         } catch (DateTimeParseException e) {
+            logger.error(e);
             return null;
         }
     }
 
     public static LocalDate parseDate(Date date) {
         if (date == null) return null;
-        return parseDate(date.toString());
+        return date.toInstant().atZone(ZoneId.of("UTC-5")).toLocalDate();
     }
 }

@@ -45,7 +45,7 @@ public class Purchase implements IDocumentConversion {
     public static Purchase fromDocument(Document d) {
         return new Purchase()
                 .vendor(Vendor.fromDocument((Document) d.get("vendor")))
-                .date(ConversionHelper.parseDate(d.getString("date")))
+                .date(ConversionHelper.parseDate(d.getDate("date")))
                 .cost(d.getDouble("cost"))
                 .unitPrice(d.getDouble("unitPrice"))
                 .quantity(Quantity.fromDocument((Document) d.get("quantity")))
