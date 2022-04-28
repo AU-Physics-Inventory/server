@@ -1,5 +1,6 @@
 package edu.andrews.cas.physics.inventory.server.model.app.asset;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import edu.andrews.cas.physics.inventory.measurement.Quantity;
 import edu.andrews.cas.physics.inventory.server.model.app.IDocumentConversion;
 import edu.andrews.cas.physics.inventory.server.model.app.asset.accountability.AccountabilityReports;
@@ -214,6 +215,11 @@ public class Asset implements IDocumentConversion {
 
     public ObjectId get_id() {
         return _id;
+    }
+
+    @JsonGetter("_id")
+    public String getId() {
+        return get_id().toString();
     }
 
     public void addKeyword(String keyword) {
