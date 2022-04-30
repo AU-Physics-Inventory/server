@@ -64,12 +64,7 @@ public class Asset implements IDocumentConversion {
         this.images = images;
     }
 
-    public Asset(Document d) {
-
-    }
-
-    private Asset() {
-    }
+    private Asset() {}
 
     public static Asset fromDocument(Document d) {
         Asset asset = new Asset()
