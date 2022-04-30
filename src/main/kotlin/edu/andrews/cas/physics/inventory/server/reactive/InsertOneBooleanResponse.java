@@ -5,8 +5,8 @@ import org.reactivestreams.Subscription;
 
 import java.util.concurrent.CompletableFuture;
 
-public class InsertOneResponse extends Subscriber<Boolean, InsertOneResult> {
-    public InsertOneResponse(CompletableFuture<Boolean> future) {
+public class InsertOneBooleanResponse extends Subscriber<Boolean, InsertOneResult> {
+    public InsertOneBooleanResponse(CompletableFuture<Boolean> future) {
         super(future);
     }
 

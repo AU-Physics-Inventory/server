@@ -6,11 +6,11 @@ import com.mongodb.reactivestreams.client.MongoDatabase
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyRegisteredException
 import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
 import edu.andrews.cas.physics.inventory.server.model.UserStatus
-import edu.andrews.cas.physics.inventory.server.reactive.InsertOneResponse
+import edu.andrews.cas.physics.inventory.server.reactive.InsertOneBooleanResponse
 import edu.andrews.cas.physics.inventory.server.reactive.UpdateResponse
 import edu.andrews.cas.physics.inventory.server.reactive.UserFinder
 import edu.andrews.cas.physics.inventory.server.repository.model.User
-import edu.andrews.cas.physics.inventory.server.request.UserRole
+import edu.andrews.cas.physics.inventory.server.request.user.UserRole
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.bson.BsonString
@@ -28,7 +28,8 @@ class AdminDAO @Autowired constructor(private val mongodb: MongoDatabase, privat
         else {
             val collection = mongodb.getCollection(USER_COLLECTION)
             val future = CompletableFuture<Boolean>()
-            val response = InsertOneResponse(future)
+            val response =
+                InsertOneBooleanResponse(future)
             collection.insertOne(user).subscribe(response)
             if (!future.get().equals(true)) throw DatabaseException()
         }
