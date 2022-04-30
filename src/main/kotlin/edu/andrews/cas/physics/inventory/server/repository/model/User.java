@@ -7,7 +7,7 @@ import org.bson.Document;
 import java.util.ArrayList;
 import java.util.List;
 
-public class User {
+public class User implements RepositoryModel {
     private final Document userDocument;
 
     public User() {

@@ -14,12 +14,13 @@ import java.util.List;
 
 public class CalibrationDetails implements IDocumentConversion {
     private static Logger logger = LogManager.getLogger();
+    public static final int DEFAULT_CALIBRATION_INTERVAL = 90;
     private LocalDate nextDate;
     private LocalDate lastDate;
-    private Long interval;
+    private Integer interval;
     private List<LocalDate> history;
 
-    public CalibrationDetails(LocalDate nextDate, LocalDate lastDate, Long interval, List<LocalDate> history) {
+    public CalibrationDetails(LocalDate nextDate, LocalDate lastDate, Integer interval, List<LocalDate> history) {
         this.nextDate = nextDate;
         this.lastDate = lastDate;
         this.history = history == null ? new ArrayList<>() : history;
@@ -33,7 +34,7 @@ public class CalibrationDetails implements IDocumentConversion {
         return new CalibrationDetails()
                 .nextDate(ConversionHelper.parseDate(d.getDate("next")))
                 .lastDate(ConversionHelper.parseDate(d.getDate("last")))
-                .interval(d.getLong("interval"))
+                .interval(d.getInteger("interval"))
                 .history(d.getList("history", Date.class).parallelStream().map(ConversionHelper::parseDate).toList());
     }
 
@@ -47,7 +48,7 @@ public class CalibrationDetails implements IDocumentConversion {
         return this;
     }
 
-    private CalibrationDetails interval(Long interval) {
+    private CalibrationDetails interval(Integer interval) {
         this.interval = interval;
         return this;
     }
@@ -81,11 +82,11 @@ public class CalibrationDetails implements IDocumentConversion {
         return history;
     }
 
-    public Long getInterval() {
+    public Integer getInterval() {
         return interval;
     }
 
-    public void setInterval(Long interval) {
+    public void setInterval(Integer interval) {
         if (interval != null && interval < 0)
             throw new IllegalArgumentException("Calibration interval may not be a negative value");
         else this.interval = interval;

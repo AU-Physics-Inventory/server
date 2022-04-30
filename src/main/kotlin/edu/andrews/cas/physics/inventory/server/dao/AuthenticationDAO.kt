@@ -8,10 +8,10 @@ import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
 import edu.andrews.cas.physics.inventory.server.exception.RegistrationNotFoundException
 import edu.andrews.cas.physics.inventory.server.model.UserStatus
 import edu.andrews.cas.physics.inventory.server.reactive.FindOneAndUpdateResponse
-import edu.andrews.cas.physics.inventory.server.reactive.InsertOneResponse
+import edu.andrews.cas.physics.inventory.server.reactive.InsertOneBooleanResponse
 import edu.andrews.cas.physics.inventory.server.reactive.UpdateResponse
 import edu.andrews.cas.physics.inventory.server.repository.model.User
-import edu.andrews.cas.physics.inventory.server.request.UserRegistration
+import edu.andrews.cas.physics.inventory.server.request.user.UserRegistration
 import edu.andrews.cas.physics.inventory.server.response.RegistrationResponse
 import edu.andrews.cas.physics.inventory.server.util.Constants
 import org.apache.logging.log4j.LogManager
@@ -35,7 +35,7 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
         logger.info("[Auth DAO] Registration of user '{}' successful? {}", userRegistration.username, response.isSuccess)
         if (response.isSuccess) {
             val future = CompletableFuture<Boolean>()
-            val insertResponse = InsertOneResponse(future)
+            val insertResponse = InsertOneBooleanResponse(future)
             val collection = mongodb.getCollection(AUTH_COLLECTION)
             val userDocument = User()
                 .status(UserStatus.ACTIVE)

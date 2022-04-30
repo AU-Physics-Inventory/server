@@ -1,4 +1,4 @@
-package edu.andrews.cas.physics.inventory.server.request;
+package edu.andrews.cas.physics.inventory.server.request.user;
 
 import java.util.List;
 

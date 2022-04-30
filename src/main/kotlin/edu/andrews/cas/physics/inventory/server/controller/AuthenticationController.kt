@@ -1,9 +1,9 @@
 package edu.andrews.cas.physics.inventory.server.controller
 
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
-import edu.andrews.cas.physics.inventory.server.request.UserLogin
+import edu.andrews.cas.physics.inventory.server.request.user.UserLogin
 import edu.andrews.cas.physics.inventory.server.service.AuthenticationService
-import edu.andrews.cas.physics.inventory.server.request.UserRegistration
+import edu.andrews.cas.physics.inventory.server.request.user.UserRegistration
 import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
 import edu.andrews.cas.physics.inventory.server.response.ErrorResponse
 import org.apache.logging.log4j.LogManager

@@ -2,13 +2,12 @@ package edu.andrews.cas.physics.inventory.server.service
 
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
 import edu.andrews.cas.physics.inventory.server.dao.UserDAO
-import edu.andrews.cas.physics.inventory.server.request.UserRegistration
+import edu.andrews.cas.physics.inventory.server.request.user.UserRegistration
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.crypto.SecretKey
-import javax.mail.internet.InternetAddress
 
 @Service
 class UserService @Autowired constructor(private val secretKey: SecretKey,
@@ -21,7 +20,15 @@ class UserService @Autowired constructor(private val secretKey: SecretKey,
         logger.info("[User Service] Handling request to update email for user '{}' to '{}'", user, email)
         emailService.validateEmailAddress(email)
         userDAO.updateEmail(user, email)
-        emailService.sendEmailVerificationEmail(UserRegistration(email, user, null, null, false))
+        emailService.sendEmailVerificationEmail(
+            UserRegistration(
+                email,
+                user,
+                null,
+                null,
+                false
+            )
+        )
     }
 
     fun changePassword(jwt: AuthorizationToken, password: String) {
