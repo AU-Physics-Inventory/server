@@ -3,9 +3,9 @@ package edu.andrews.cas.physics.inventory.server.service
 import edu.andrews.cas.physics.inventory.server.dao.AdminDAO
 import edu.andrews.cas.physics.inventory.server.repository.model.User
 import edu.andrews.cas.physics.inventory.server.model.UserStatus
-import edu.andrews.cas.physics.inventory.server.request.ChangeUserStatusRequest
-import edu.andrews.cas.physics.inventory.server.request.UserInvitation
-import edu.andrews.cas.physics.inventory.server.request.UserRole
+import edu.andrews.cas.physics.inventory.server.request.user.ChangeUserStatusRequest
+import edu.andrews.cas.physics.inventory.server.request.user.UserInvitation
+import edu.andrews.cas.physics.inventory.server.request.user.UserRole
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
