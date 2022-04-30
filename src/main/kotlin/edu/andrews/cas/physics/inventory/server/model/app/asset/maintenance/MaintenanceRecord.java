@@ -24,13 +24,13 @@ public class MaintenanceRecord implements IDocumentConversion {
 
     public MaintenanceRecord(@NonNull MaintenanceEvent currentStatus, List<MaintenanceEvent> history, CalibrationDetails calibrationDetails, String notes) {
         this.currentStatus = currentStatus;
-        this.history = history;
+        this.history = history == null ? new ArrayList<>() : history;
         this.calibrationDetails = calibrationDetails;
         this.notes = notes;
     }
 
     public MaintenanceRecord(List<MaintenanceEvent> history, CalibrationDetails calibrationDetails) {
-        this.history = history;
+        this.history = history == null ? new ArrayList<>() : history;
         this.calibrationDetails = calibrationDetails;
         this.currentStatus = UNKNOWN_EVENT;
     }

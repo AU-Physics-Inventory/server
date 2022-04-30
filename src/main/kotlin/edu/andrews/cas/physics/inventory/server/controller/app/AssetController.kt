@@ -3,6 +3,7 @@ package edu.andrews.cas.physics.inventory.server.controller.app
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
 import edu.andrews.cas.physics.inventory.server.model.app.asset.Asset
 import edu.andrews.cas.physics.inventory.server.request.app.AssetRequest
+import edu.andrews.cas.physics.inventory.server.response.app.InsertedAssetResponse
 import edu.andrews.cas.physics.inventory.server.service.app.AssetService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -40,14 +41,21 @@ class AssetController @Autowired constructor(private val assetService: AssetServ
 
     @PostMapping("/add")
     fun add(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken,
         @RequestBody assetRequest: AssetRequest,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<InsertedAssetResponse> {
         logger.info("[Asset Controller] Received request to add asset: {}", assetRequest)
         val result = assetService.addAsset(assetRequest, jwt)
-        return if (result == null) ResponseEntity.noContent().build() else ResponseEntity.status(204)
-            .body(result.toString())
+        return ResponseEntity.status(201).body(InsertedAssetResponse(result.first.toString(), result.second))
     }
+
+    @DeleteMapping("/asset")
+    fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken,
+               @RequestParam id: String) : ResponseEntity<Any> {
+        return if (assetService.deleteAsset(id, jwt)) ResponseEntity.accepted().build()
+        else ResponseEntity.status(401).build()
+    }
+
 
     companion object {
         private val logger: Logger = LogManager.getLogger()

@@ -58,7 +58,7 @@ public class Asset implements IDocumentConversion {
         this.purchases = purchases;
         this.quantity = quantity;
         this.accountabilityReports = accountabilityReports;
-        this.accountabilityReports.setAsset(this);
+        this.accountabilityReports.setUnit(this.quantity.getUnit());
         this.maintenanceRecord = maintenanceRecord;
         this.notes = notes;
         this.images = images;
@@ -82,7 +82,7 @@ public class Asset implements IDocumentConversion {
                 .maintenanceRecord(MaintenanceRecord.fromDocument(d.get("maintenanceRecord", Document.class)))
                 .consumable(d.getBoolean("consumable"))
                 .images(d.getList("images", String.class));
-        asset.getAccountabilityReports().setAsset(asset);
+        asset.getAccountabilityReports().setUnit(asset.quantity.getUnit());
         return asset;
     }
 

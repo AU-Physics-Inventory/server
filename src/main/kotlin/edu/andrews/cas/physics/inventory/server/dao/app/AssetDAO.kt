@@ -4,19 +4,19 @@ import com.mongodb.client.model.Filters.*
 import com.mongodb.client.result.InsertOneResult
 import com.mongodb.reactivestreams.client.MongoDatabase
 import edu.andrews.cas.physics.inventory.server.model.app.asset.Asset
+import edu.andrews.cas.physics.inventory.server.reactive.DeleteOneBooleanResponse
 import edu.andrews.cas.physics.inventory.server.reactive.DocumentFinder
 import edu.andrews.cas.physics.inventory.server.reactive.InsertOneBooleanResponse
 import edu.andrews.cas.physics.inventory.server.reactive.InsertOneResultResponse
 import edu.andrews.cas.physics.inventory.server.repository.model.IrregularLocation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.bson.BsonObjectId
-import org.bson.BsonValue
 import org.bson.Document
 import org.bson.conversions.Bson
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.util.concurrent.CompletableFuture
 
 @Component
@@ -42,7 +42,7 @@ class AssetDAO @Autowired constructor(private val mongodb: MongoDatabase) {
         return future
     }
 
-    fun insert(asset: Asset, irregularLocation: IrregularLocation? = null) : ObjectId? {
+    fun insert(asset: Asset, irregularLocation: IrregularLocation? = null) : ObjectId {
         logger.info("[Asset DAO] Inserting new asset: '{}' with {}regular location", asset.name, if (irregularLocation != null) "ir" else "")
         val future = CompletableFuture<InsertOneResult>()
         val response = InsertOneResultResponse(future)
@@ -55,12 +55,28 @@ class AssetDAO @Autowired constructor(private val mongodb: MongoDatabase) {
             val col = mongodb.getCollection(IRREGULAR_LOCATIONS_COLLECTION)
             col.insertOne(irregularLocation.assetID(result.insertedId!!.asObjectId().value).build()).subscribe(res)
             fut.get().insertedId?.asObjectId()!!.value
-        } else null
+        } else result.insertedId!!.asObjectId().value
+    }
+
+    fun delete(asset: Asset, by: String) {
+        logger.info("[Asset DAO] Deleting asset with id '{}' and name '{}'", asset.id, asset.name)
+        val assetFuture = CompletableFuture<Boolean>()
+        val assetResponse = DeleteOneBooleanResponse(assetFuture)
+        val assetCollection = mongodb.getCollection(ASSET_COLLECTION)
+        assetCollection.deleteOne(eq("_id", asset._id)).subscribe(assetResponse)
+        assetFuture.whenCompleteAsync{ _, _ -> }
+        val deletedAssetDocument = asset.toDocument().append("deleted", Document().append("by", by).append("date", LocalDate.now()))
+        val deletedFuture = CompletableFuture<Boolean>()
+        val deletedResponse = InsertOneBooleanResponse(deletedFuture)
+        val deletedCollection = mongodb.getCollection(DELETED_ASSETS_COLLECTION)
+        deletedCollection.insertOne(deletedAssetDocument).subscribe(deletedResponse)
+        deletedFuture.whenCompleteAsync { _, _ ->  }
     }
 
     companion object {
         private val logger: Logger = LogManager.getLogger()
         private const val ASSET_COLLECTION = "assets"
+        private const val DELETED_ASSETS_COLLECTION = "deletedAssets"
         private const val IRREGULAR_LOCATIONS_COLLECTION = "irregularLocations"
     }
 }

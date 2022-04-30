@@ -53,7 +53,7 @@ class AdminController @Autowired constructor(private val adminService: AdminServ
         return ResponseEntity.accepted().build()
     }
 
-    @PostMapping("/admin/user/logout")
+    @PostMapping("/user/logout")
     fun logoutUser(@RequestBody user: String) : ResponseEntity<Any> {
         return if (authService.logout(user)) ResponseEntity.ok().build()
         else ResponseEntity.internalServerError().build()

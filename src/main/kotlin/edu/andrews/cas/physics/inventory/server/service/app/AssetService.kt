@@ -5,6 +5,7 @@ import edu.andrews.cas.physics.inventory.measurement.Quantity
 import edu.andrews.cas.physics.inventory.measurement.Unit
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
 import edu.andrews.cas.physics.inventory.server.dao.app.AssetDAO
+import edu.andrews.cas.physics.inventory.server.exception.AssetNotFoundException
 import edu.andrews.cas.physics.inventory.server.exception.DuplicateSearchParameter
 import edu.andrews.cas.physics.inventory.server.exception.InvalidAssetRequestException
 import edu.andrews.cas.physics.inventory.server.exception.InvalidSearchParametersException
@@ -73,7 +74,7 @@ class AssetService @Autowired constructor(
         return map
     }
 
-    fun addAsset(assetRequest: AssetRequest, authorizationToken: AuthorizationToken): ObjectId? {
+    fun addAsset(assetRequest: AssetRequest, authorizationToken: AuthorizationToken): Pair<ObjectId, Boolean> {
         logger.info("[Asset Service] Performing validation of new asset: '{}'", assetRequest.name)
         val claims = authorizationToken.getClaims(secretKey)
         val user = claims.body.subject
@@ -86,7 +87,7 @@ class AssetService @Autowired constructor(
         if (irregularLocation) assetRequest.location = "//Pending approval//"
         val mfrInfo =
             ManufacturerInfo(assetRequest.brand, assetRequest.model, assetRequest.partNo, assetRequest.serialNo)
-        val quantity = Quantity(assetRequest.quantity, Unit.lookup(assetRequest.unit))
+        val quantity = Quantity(assetRequest.quantity, Unit.UNITS)
         val calibrationDetails = if (assetRequest.nextCalibrationDate != null)
             CalibrationDetails(
                 assetRequest.nextCalibrationDate,
@@ -100,22 +101,27 @@ class AssetService @Autowired constructor(
             assetRequest.name, assetRequest.location, assetRequest.identityNo, assetRequest.auInventoryNo,
             assetRequest.isConsumable, mfrInfo, quantity, maintenanceRecord, assetRequest.notes
         )
-        assetRequest.keywords.forEach(asset::addKeyword)
-        assetRequest.images.forEach(asset::addImage)
+        assetRequest.keywords?.forEach(asset::addKeyword)
+        assetRequest.images?.forEach(asset::addImage)
         val cost = assetRequest.cost ?: 0.00
         val unitPrice = assetRequest.unitPrice ?: (cost / quantity.value)
-        asset.addPurchase(
-            Purchase(
-                Vendor(assetRequest.vendor, URL(assetRequest.vendorURL)),
-                assetRequest.purchaseDate,
-                cost,
-                unitPrice,
-                quantity,
-                URL(assetRequest.purchaseURL),
-                assetRequest.receipt
+        if (assetRequest.vendor != null) {
+            asset.addPurchase(
+                Purchase(
+                    Vendor(
+                        assetRequest.vendor,
+                        if (assetRequest.vendorURL == null) null else URL(assetRequest.vendorURL)
+                    ),
+                    assetRequest.purchaseDate,
+                    cost,
+                    unitPrice,
+                    quantity,
+                    if (assetRequest.purchaseURL == null) null else URL(assetRequest.purchaseURL),
+                    assetRequest.receipt
+                )
             )
-        )
-        return assetDAO.insert(asset, irregularLocationDoc)
+        }
+        return Pair(assetDAO.insert(asset, irregularLocationDoc), irregularLocation)
     }
 
     private fun validateLocation(location: String?): Boolean {
@@ -125,6 +131,16 @@ class AssetService @Autowired constructor(
         return location.matches(Regex("[A-Z][A-Z]([A-Z]([A-Z]([A-Z]|)|)|)(-[0-9][0-9][0-9](-FLOOR|-REPAIR|-DOOR|([A-Z]|)(-[A-Z]([0-9](/[A-Z][0-9]|)|-[0-9])(-BOX[0-9]*|)|))|)"))
                 && buildingCodes.contains(location.split('-')[0]
         )
+    }
+
+    fun deleteAsset(id: String, authorizationToken: AuthorizationToken) : Boolean {
+        logger.info("[Asset Service] Deleting asset with id: {}", id)
+        val claims = authorizationToken.getClaims(secretKey)
+        if (!(claims.body["roles"] as String).contains("admin")) return false
+        val assets = getAssets(listOf(id))
+        if (assets.isEmpty()) throw AssetNotFoundException(id)
+        assetDAO.delete(assets[0], claims.body.subject)
+        return true
     }
 
     companion object {
