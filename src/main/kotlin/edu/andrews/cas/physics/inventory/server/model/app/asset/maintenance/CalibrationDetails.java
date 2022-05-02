@@ -2,7 +2,6 @@ package edu.andrews.cas.physics.inventory.server.model.app.asset.maintenance;
 
 import edu.andrews.cas.physics.inventory.server.model.app.IDocumentConversion;
 import edu.andrews.cas.physics.inventory.server.util.ConversionHelper;
-import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;
@@ -13,8 +12,8 @@ import java.util.Date;
 import java.util.List;
 
 public class CalibrationDetails implements IDocumentConversion {
-    private static Logger logger = LogManager.getLogger();
     public static final int DEFAULT_CALIBRATION_INTERVAL = 90;
+    private static final Logger logger = LogManager.getLogger();
     private LocalDate nextDate;
     private LocalDate lastDate;
     private Integer interval;
@@ -61,7 +60,7 @@ public class CalibrationDetails implements IDocumentConversion {
     public void addEvent(LocalDate eventDate) {
         this.history.add(this.lastDate);
         this.lastDate = eventDate;
-        if (this.interval != null) this.nextDate = this.nextDate.plusDays(interval);
+        this.nextDate = eventDate.plusDays(this.interval == null ? DEFAULT_CALIBRATION_INTERVAL : this.interval);
     }
 
     public void addEvent(LocalDate eventDate, LocalDate nextDate) {
@@ -72,6 +71,10 @@ public class CalibrationDetails implements IDocumentConversion {
 
     public LocalDate getNextDate() {
         return nextDate;
+    }
+
+    public void setNextDate(LocalDate nextDate) {
+        this.nextDate = nextDate;
     }
 
     public LocalDate getLastDate() {

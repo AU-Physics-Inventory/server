@@ -1,10 +1,7 @@
 package edu.andrews.cas.physics.inventory.server.util;
 
-import edu.andrews.cas.physics.inventory.server.model.app.IDocumentConversion;
-import edu.andrews.cas.physics.inventory.server.model.app.asset.Asset;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bson.Document;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -36,6 +33,6 @@ public class ConversionHelper {
 
     public static LocalDate parseDate(Date date) {
         if (date == null) return null;
-        return date.toInstant().atZone(ZoneId.of("UTC-5")).toLocalDate();
+        return date.toInstant().atZone(ZoneId.of("UTC")).toLocalDate();
     }
 }

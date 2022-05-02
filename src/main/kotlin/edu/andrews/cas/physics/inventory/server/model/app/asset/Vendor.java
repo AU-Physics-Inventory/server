@@ -18,6 +18,6 @@ public record Vendor(@NonNull String name, URL url) implements IDocumentConversi
     public Document toDocument() {
         return new Document()
                 .append("name", this.name())
-                .append("url", this.url());
+                .append("url", this.url() == null ? null : this.url().toString());
     }
 }

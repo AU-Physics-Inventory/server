@@ -53,6 +53,7 @@ public enum Unit {
     }
 
     public static Unit lookup(String s) throws IllegalArgumentException {
+        if (s == null) return Unit.UNITS;
         for (Unit u : Unit.values()) {
             if (u.getSymbol().equals(s)) return u;
         }

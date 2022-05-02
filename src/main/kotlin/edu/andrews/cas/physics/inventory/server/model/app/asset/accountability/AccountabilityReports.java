@@ -1,5 +1,6 @@
 package edu.andrews.cas.physics.inventory.server.model.app.asset.accountability;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import edu.andrews.cas.physics.inventory.measurement.OperationOnQuantitiesException;
 import edu.andrews.cas.physics.inventory.measurement.Quantity;
 import edu.andrews.cas.physics.inventory.measurement.Unit;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AccountabilityReports implements IDocumentConversion {
+    @JsonIgnore
     private Unit unit;
     private List<MissingReport> missingReports;
     private List<RecoveryReport> recoveryReports;

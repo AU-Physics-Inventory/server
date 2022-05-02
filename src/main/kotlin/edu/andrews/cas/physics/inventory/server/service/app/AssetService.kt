@@ -1,6 +1,8 @@
 package edu.andrews.cas.physics.inventory.server.service.app
 
 import com.mongodb.client.model.Filters.*
+import com.mongodb.client.model.Updates.addToSet
+import com.mongodb.client.model.Updates.set
 import edu.andrews.cas.physics.inventory.measurement.Quantity
 import edu.andrews.cas.physics.inventory.measurement.Unit
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
@@ -65,7 +67,7 @@ class AssetService @Autowired constructor(
                         logger.error("[Asset Service] Duplicate parameter '{}' received in query.", param)
                         throw DuplicateSearchParameter(param)
                     }
-                } else if (!skippedParameters.contains(param)) {
+                } else if (!skippedSearchParameters.contains(param)) {
                     logger.error("[Asset Service] Search parameter '{}' is not a valid search parameter.", param)
                     throw InvalidSearchParametersException(param)
                 }
@@ -79,6 +81,7 @@ class AssetService @Autowired constructor(
         val claims = authorizationToken.getClaims(secretKey)
         val user = claims.body.subject
         val isAdmin = (claims.body["roles"] as String).contains("admin")
+        //val isAdmin = false
         if (assetRequest.name == null) throw InvalidAssetRequestException("name")
         val validLocation = validateLocation(assetRequest.location)
         val irregularLocation = !validLocation && !isAdmin
@@ -87,7 +90,7 @@ class AssetService @Autowired constructor(
         if (irregularLocation) assetRequest.location = "//Pending approval//"
         val mfrInfo =
             ManufacturerInfo(assetRequest.brand, assetRequest.model, assetRequest.partNo, assetRequest.serialNo)
-        val quantity = Quantity(assetRequest.quantity, Unit.UNITS)
+        val quantity = Quantity(assetRequest.quantity, Unit.lookup(assetRequest.unit))
         val calibrationDetails = if (assetRequest.nextCalibrationDate != null)
             CalibrationDetails(
                 assetRequest.nextCalibrationDate,
@@ -129,8 +132,7 @@ class AssetService @Autowired constructor(
         if (location.length >= 3 && location.substring(0, 3) == "OBS")
             return location.matches(Regex("OBS(-L([12])(-[A-Z][0-9](/[A-Z][0-9]|)|)|)"))
         return location.matches(Regex("[A-Z][A-Z]([A-Z]([A-Z]([A-Z]|)|)|)(-[0-9][0-9][0-9](-FLOOR|-REPAIR|-DOOR|([A-Z]|)(-[A-Z]([0-9](/[A-Z][0-9]|)|-[0-9])(-BOX[0-9]*|)|))|)"))
-                && buildingCodes.contains(location.split('-')[0]
-        )
+                && buildingCodes.contains(location.split('-')[0])
     }
 
     fun deleteAsset(id: String, authorizationToken: AuthorizationToken) : Boolean {

@@ -124,7 +124,7 @@ public class Purchase implements IDocumentConversion {
                 .append("cost", getCost())
                 .append("unitPrice", getUnitPrice())
                 .append("quantity", getQuantity().toDocument())
-                .append("url", getUrl())
+                .append("url", getUrl() == null ? null : getUrl().toString())
                 .append("receipt", getReceipt());
     }
 

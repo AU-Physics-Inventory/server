@@ -1,5 +1,6 @@
 package edu.andrews.cas.physics.inventory.measurement;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import edu.andrews.cas.physics.inventory.server.model.app.IDocumentConversion;
 import lombok.NonNull;
 import org.bson.Document;
@@ -115,6 +116,11 @@ public class Quantity implements IDocumentConversion {
 
     public Unit getUnit() {
         return unit;
+    }
+
+    @JsonGetter("unit")
+    public String getUnitSymbol() {
+        return getUnit().getSymbol();
     }
 
     public boolean sameUnitsAs(@NonNull Quantity q) {

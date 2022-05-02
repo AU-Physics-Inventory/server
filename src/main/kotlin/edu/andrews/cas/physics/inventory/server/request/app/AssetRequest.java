@@ -1,5 +1,7 @@
 package edu.andrews.cas.physics.inventory.server.request.app;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.time.LocalDate;
@@ -22,7 +24,7 @@ public class AssetRequest {
     private LocalDate purchaseDate;
     private Double cost;
     private Double unitPrice;
-    private double quantity;
+    private double quantity = 1;
     private String unit;
     private String purchaseURL;
     private String receipt;
@@ -70,10 +72,12 @@ public class AssetRequest {
         this.identityNo = identityNo;
     }
 
+    @JsonGetter("AUInventoryNo")
     public String getAUInventoryNo() {
         return AUInventoryNo;
     }
 
+    @JsonSetter("AUInventoryNo")
     public void setAUInventoryNo(String AUInventoryNo) {
         this.AUInventoryNo = AUInventoryNo;
     }
@@ -162,7 +166,7 @@ public class AssetRequest {
         return quantity;
     }
 
-    public void setQuantity(double quantity) {
+    public void setQuantity(Double quantity) {
         this.quantity = quantity;
     }
 

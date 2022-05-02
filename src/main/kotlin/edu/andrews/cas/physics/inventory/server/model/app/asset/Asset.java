@@ -172,6 +172,7 @@ public class Asset implements IDocumentConversion {
         return identityNo;
     }
 
+    @JsonGetter("AUInventoryNo")
     public String getAUInventoryNo() {
         return AUInventoryNo;
     }
