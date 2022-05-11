@@ -33,7 +33,7 @@ public class IrregularLocation implements RepositoryModel {
         return this.document.getString("user");
     }
 
-    public ObjectId getObjectId() {
+    public ObjectId getAssetID() {
         return this.document.getObjectId("assetID");
     }
 

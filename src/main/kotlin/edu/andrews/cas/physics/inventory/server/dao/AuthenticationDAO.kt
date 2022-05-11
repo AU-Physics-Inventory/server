@@ -9,7 +9,7 @@ import edu.andrews.cas.physics.inventory.server.exception.RegistrationNotFoundEx
 import edu.andrews.cas.physics.inventory.server.model.UserStatus
 import edu.andrews.cas.physics.inventory.server.reactive.FindOneAndUpdateResponse
 import edu.andrews.cas.physics.inventory.server.reactive.InsertOneBooleanResponse
-import edu.andrews.cas.physics.inventory.server.reactive.UpdateResponse
+import edu.andrews.cas.physics.inventory.server.reactive.UpdateBooleanResponse
 import edu.andrews.cas.physics.inventory.server.repository.model.User
 import edu.andrews.cas.physics.inventory.server.request.user.UserRegistration
 import edu.andrews.cas.physics.inventory.server.response.RegistrationResponse
@@ -59,7 +59,8 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
         if (userDAO.findUserByName(userRegistration.username).get().isNotEmpty()) return RegistrationResponse(true, false)
         val user = users[0].username(userRegistration.username).password(userRegistration.password).salt(salt).status(UserStatus.ACTIVE).emailVerified(userRegistration.isFromEmailLink)
         val future = CompletableFuture<Boolean>()
-        val response = UpdateResponse(future)
+        val response =
+            UpdateBooleanResponse(future)
         val collection = mongodb.getCollection(AUTH_COLLECTION)
         collection.replaceOne(eq("email", userRegistration.email), user.build()).subscribe(response)
         val ack = future.get()
@@ -90,7 +91,10 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
             run {
                 if (d != null && d.getInteger("failedAttempts") >= Constants.MAX_FAILED_LOGIN_ATTEMPTS) {
                     val future2 = CompletableFuture<Boolean>()
-                    val response2 = UpdateResponse(future2)
+                    val response2 =
+                        UpdateBooleanResponse(
+                            future2
+                        )
                     collection.updateOne(eq("username", user), set("status", UserStatus.LOCKED.name))
                         .subscribe(response2)
                     future2.whenCompleteAsync { _, _ -> }
@@ -109,7 +113,8 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
     fun setPassword(user: String, password: String, salt: String) {
         logger.info("[Auth DAO] Setting password for user: {}", user)
         val future = CompletableFuture<Boolean>()
-        val response = UpdateResponse(future)
+        val response =
+            UpdateBooleanResponse(future)
         val collection = mongodb.getCollection(AUTH_COLLECTION)
         collection.updateOne(eq("username", user), combine(set("password", password), set("salt", salt))).subscribe(response)
         future.whenCompleteAsync { _, _ ->  }
@@ -118,7 +123,8 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
     fun unlockAccount(user: String) {
         logger.info("[Auth DAO] Unlocking account for user: {}", user)
         val future = CompletableFuture<Boolean>()
-        val response = UpdateResponse(future)
+        val response =
+            UpdateBooleanResponse(future)
         val collection = mongodb.getCollection(AUTH_COLLECTION)
         collection.updateOne(combine(eq("username", user), eq("status", UserStatus.LOCKED.name)), set("status", UserStatus.ACTIVE.name)).subscribe(response)
         future.whenCompleteAsync { _, _ ->  }

@@ -1,13 +1,12 @@
 package edu.andrews.cas.physics.inventory.server.dao.app
 
 import com.mongodb.client.model.Filters.*
+import com.mongodb.client.model.ReplaceOptions
 import com.mongodb.client.result.InsertOneResult
+import com.mongodb.client.result.UpdateResult
 import com.mongodb.reactivestreams.client.MongoDatabase
 import edu.andrews.cas.physics.inventory.server.model.app.asset.Asset
-import edu.andrews.cas.physics.inventory.server.reactive.DeleteOneBooleanResponse
-import edu.andrews.cas.physics.inventory.server.reactive.DocumentFinder
-import edu.andrews.cas.physics.inventory.server.reactive.InsertOneBooleanResponse
-import edu.andrews.cas.physics.inventory.server.reactive.InsertOneResultResponse
+import edu.andrews.cas.physics.inventory.server.reactive.*
 import edu.andrews.cas.physics.inventory.server.repository.model.IrregularLocation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -21,10 +20,10 @@ import java.util.concurrent.CompletableFuture
 
 @Component
 class AssetDAO @Autowired constructor(private val mongodb: MongoDatabase) {
-    fun findAssetsByID(ids: List<String>): CompletableFuture<List<Document>> {
+    fun findAssetsByID(ids: List<String>): CompletableFuture<List<Asset>> {
         logger.info("[Asset DAO] Finding assets with id: {}", ids.parallelStream().map { id -> ObjectId(id) }.toList().toString())
-        val future = CompletableFuture<List<Document>>()
-        val finder = DocumentFinder(future)
+        val future = CompletableFuture<List<Asset>>()
+        val finder = AssetFinder(future)
         val collection = mongodb.getCollection(ASSET_COLLECTION)
         collection.find(`in`("_id", ids.parallelStream().map { id -> ObjectId(id) }.toList())).subscribe(finder)
         return future
@@ -71,6 +70,30 @@ class AssetDAO @Autowired constructor(private val mongodb: MongoDatabase) {
         val deletedCollection = mongodb.getCollection(DELETED_ASSETS_COLLECTION)
         deletedCollection.insertOne(deletedAssetDocument).subscribe(deletedResponse)
         deletedFuture.whenCompleteAsync { _, _ ->  }
+    }
+
+    fun update(asset: Asset, irregularLocation: IrregularLocation? = null): ObjectId? {
+        logger.info("[Asset DAO] Updating asset with id '{}'", asset.id)
+        val future = CompletableFuture<Boolean>()
+        val response =
+            UpdateBooleanResponse(future)
+        val collection = mongodb.getCollection(ASSET_COLLECTION)
+        collection.updateOne(eq("_id", asset._id), asset.toUpdateDocument()).subscribe(response)
+        return if (future.get() && irregularLocation != null) {
+            val fut = CompletableFuture<UpdateResult>()
+            val res = UpdateResultResponse(fut)
+            val col = mongodb.getCollection(IRREGULAR_LOCATIONS_COLLECTION)
+            col.replaceOne(eq("assetID", irregularLocation.assetID), irregularLocation.build(), ReplaceOptions().upsert(true)).subscribe(res)
+            val upsertId = fut.get().upsertedId
+            if (upsertId != null) upsertId.asObjectId().value
+            else {
+                val f = CompletableFuture<List<Document>>()
+                val r = DocumentFinder(f)
+                col.find(eq("assetID", irregularLocation.assetID)).subscribe(r)
+                val d = f.get()
+                d[0].getObjectId("_id")
+            }
+        } else null
     }
 
     companion object {

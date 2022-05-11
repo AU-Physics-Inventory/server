@@ -1,13 +1,12 @@
 package edu.andrews.cas.physics.inventory.server.reactive;
 
-import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
 import org.reactivestreams.Subscription;
 
 import java.util.concurrent.CompletableFuture;
 
-public class UpdateResponse extends Subscriber<Boolean, UpdateResult> {
-    public UpdateResponse(CompletableFuture<Boolean> future) {
+public class UpdateBooleanResponse extends Subscriber<Boolean, UpdateResult> {
+    public UpdateBooleanResponse(CompletableFuture<Boolean> future) {
         super(future);
     }
 

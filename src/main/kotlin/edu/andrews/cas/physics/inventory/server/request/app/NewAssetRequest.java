@@ -7,7 +7,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.time.LocalDate;
 import java.util.List;
 
-public class AssetRequest {
+public class NewAssetRequest {
     private String name;
     private String location;
     private List<String> keywords;

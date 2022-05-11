@@ -1,15 +1,22 @@
 package edu.andrews.cas.physics.inventory.server.model.app.asset;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.mongodb.client.model.Updates;
 import edu.andrews.cas.physics.inventory.measurement.Quantity;
+import edu.andrews.cas.physics.inventory.server.exception.InvalidAssetRequestException;
 import edu.andrews.cas.physics.inventory.server.model.app.IDocumentConversion;
 import edu.andrews.cas.physics.inventory.server.model.app.asset.accountability.AccountabilityReports;
 import edu.andrews.cas.physics.inventory.server.model.app.asset.maintenance.MaintenanceRecord;
+import edu.andrews.cas.physics.inventory.server.request.app.UpdateAssetRequest;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.mongodb.client.model.Updates.combine;
+import static com.mongodb.client.model.Updates.set;
 
 public class Asset implements IDocumentConversion {
     private ObjectId _id = null;
@@ -19,7 +26,7 @@ public class Asset implements IDocumentConversion {
     private List<String> images;
     private Integer identityNo;
     private String AUInventoryNo;
-    private boolean consumable;
+    private Boolean consumable;
     private ManufacturerInfo manufacturerInfo;
     private List<Purchase> purchases;
     private Quantity quantity;
@@ -44,26 +51,6 @@ public class Asset implements IDocumentConversion {
         this.images = new ArrayList<>();
     }
 
-    public Asset(String name, String location, List<String> keywords, List<String> images, Integer identityNo, String AUInventoryNo,
-                 boolean consumable, ManufacturerInfo manufacturerInfo, List<Purchase> purchases,
-                 Quantity quantity, AccountabilityReports accountabilityReports,
-                 MaintenanceRecord maintenanceRecord, String notes) {
-        this.name = name;
-        this.location = location;
-        this.keywords = keywords;
-        this.identityNo = identityNo;
-        this.AUInventoryNo = AUInventoryNo;
-        this.consumable = consumable;
-        this.manufacturerInfo = manufacturerInfo;
-        this.purchases = purchases;
-        this.quantity = quantity;
-        this.accountabilityReports = accountabilityReports;
-        this.accountabilityReports.setUnit(this.quantity.getUnit());
-        this.maintenanceRecord = maintenanceRecord;
-        this.notes = notes;
-        this.images = images;
-    }
-
     private Asset() {}
 
     public static Asset fromDocument(Document d) {
@@ -84,6 +71,23 @@ public class Asset implements IDocumentConversion {
                 .images(d.getList("images", String.class));
         asset.getAccountabilityReports().setUnit(asset.quantity.getUnit());
         return asset;
+    }
+
+    public static Asset fromUpdateRequest(UpdateAssetRequest request) throws InvalidAssetRequestException {
+        if (request.getId() == null) throw new InvalidAssetRequestException("id");
+        try {
+            return new Asset()
+                    ._id(new ObjectId(request.getId()))
+                    .name(request.getName())
+                    .location(request.getLocation())
+                    .keywords(request.getKeywords())
+                    .identityNo(request.getIdentityNo())
+                    .AUInventoryNo(request.getAUInventoryNo())
+                    .consumable(request.isConsumable())
+                    .notes(request.getNotes());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidAssetRequestException("id");
+        }
     }
 
     private Asset _id(ObjectId id) {
@@ -177,7 +181,7 @@ public class Asset implements IDocumentConversion {
         return AUInventoryNo;
     }
 
-    public boolean isConsumable() {
+    public Boolean isConsumable() {
         return consumable;
     }
 
@@ -248,5 +252,17 @@ public class Asset implements IDocumentConversion {
                 .append("images", getImages());
         if (get_id() != null) d.append("_id", get_id());
         return d;
+    }
+
+    public Bson toUpdateDocument() {
+        ArrayList<Bson> updates = new ArrayList<>();
+        if (getName() != null) updates.add(set("name", getName()));
+        if (getLocation() != null) updates.add(set("location", getLocation()));
+        if (getKeywords() != null) updates.add(set("keywords", getKeywords()));
+        if (getIdentityNo() != null) updates.add(set("identityNo", getIdentityNo()));
+        if (getAUInventoryNo() != null) updates.add(set("AUInventoryNo", getAUInventoryNo()));
+        if (isConsumable() != null) updates.add(set("consumable", isConsumable()));
+        if (getNotes() != null) updates.add(set("notes", getNotes()));
+        return combine(updates);
     }
 }

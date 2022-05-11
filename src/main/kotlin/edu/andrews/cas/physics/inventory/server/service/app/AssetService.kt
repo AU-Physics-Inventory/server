@@ -1,8 +1,6 @@
 package edu.andrews.cas.physics.inventory.server.service.app
 
 import com.mongodb.client.model.Filters.*
-import com.mongodb.client.model.Updates.addToSet
-import com.mongodb.client.model.Updates.set
 import edu.andrews.cas.physics.inventory.measurement.Quantity
 import edu.andrews.cas.physics.inventory.measurement.Unit
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
@@ -20,7 +18,9 @@ import edu.andrews.cas.physics.inventory.server.model.app.asset.maintenance.Main
 import edu.andrews.cas.physics.inventory.server.model.app.asset.maintenance.MaintenanceRecord
 import edu.andrews.cas.physics.inventory.server.model.app.asset.maintenance.Status
 import edu.andrews.cas.physics.inventory.server.repository.model.IrregularLocation
-import edu.andrews.cas.physics.inventory.server.request.app.AssetRequest
+import edu.andrews.cas.physics.inventory.server.request.app.NewAssetRequest
+import edu.andrews.cas.physics.inventory.server.request.app.UpdateAssetRequest
+import edu.andrews.cas.physics.inventory.server.service.AuthenticationService
 import edu.andrews.cas.physics.inventory.server.util.ConversionHelper
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -34,6 +34,7 @@ import javax.crypto.SecretKey
 
 @Service
 class AssetService @Autowired constructor(
+    private val authService: AuthenticationService,
     private val assetDAO: AssetDAO,
     private val secretKey: SecretKey,
     private val buildingCodes: List<String>
@@ -41,8 +42,7 @@ class AssetService @Autowired constructor(
     fun getAssets(ids: List<String>): List<Asset> {
         logger.info("[Asset Service] Getting asset with id = '{}'", ids.toString())
         val assetsFuture = assetDAO.findAssetsByID(ids)
-        val assets = assetsFuture.get() ?: ArrayList()
-        return assets.parallelStream().map { a -> Asset.fromDocument(a) }.toList()
+        return assetsFuture.get() ?: ArrayList()
     }
 
     fun search(params: Map<String, String>): List<Asset> {
@@ -76,51 +76,50 @@ class AssetService @Autowired constructor(
         return map
     }
 
-    fun addAsset(assetRequest: AssetRequest, authorizationToken: AuthorizationToken): Pair<ObjectId, Boolean> {
-        logger.info("[Asset Service] Performing validation of new asset: '{}'", assetRequest.name)
-        val claims = authorizationToken.getClaims(secretKey)
-        val user = claims.body.subject
-        val isAdmin = (claims.body["roles"] as String).contains("admin")
+    fun addAsset(newAssetRequest: NewAssetRequest, authorizationToken: AuthorizationToken): Pair<ObjectId, Boolean> {
+        logger.info("[Asset Service] Performing validation of new asset: '{}'", newAssetRequest.name)
+        val user = authorizationToken.getClaims(secretKey).body.subject
+        val isAdmin = authService.isUserAdmin(authorizationToken)
         //val isAdmin = false
-        if (assetRequest.name == null) throw InvalidAssetRequestException("name")
-        val validLocation = validateLocation(assetRequest.location)
+        if (newAssetRequest.name == null) throw InvalidAssetRequestException("name")
+        val validLocation = validateLocation(newAssetRequest.location)
         val irregularLocation = !validLocation && !isAdmin
         val irregularLocationDoc =
-            if (irregularLocation) IrregularLocation().location(assetRequest.location).user(user) else null
-        if (irregularLocation) assetRequest.location = "//Pending approval//"
+            if (irregularLocation) IrregularLocation().location(newAssetRequest.location).user(user) else null
+        if (irregularLocation) newAssetRequest.location = "//Pending approval//"
         val mfrInfo =
-            ManufacturerInfo(assetRequest.brand, assetRequest.model, assetRequest.partNo, assetRequest.serialNo)
-        val quantity = Quantity(assetRequest.quantity, Unit.lookup(assetRequest.unit))
-        val calibrationDetails = if (assetRequest.nextCalibrationDate != null)
+            ManufacturerInfo(newAssetRequest.brand, newAssetRequest.model, newAssetRequest.partNo, newAssetRequest.serialNo)
+        val quantity = Quantity(newAssetRequest.quantity, Unit.lookup(newAssetRequest.unit))
+        val calibrationDetails = if (newAssetRequest.nextCalibrationDate != null)
             CalibrationDetails(
-                assetRequest.nextCalibrationDate,
+                newAssetRequest.nextCalibrationDate,
                 LocalDate.EPOCH,
-                assetRequest.calibrationInterval ?: CalibrationDetails.DEFAULT_CALIBRATION_INTERVAL,
+                newAssetRequest.calibrationInterval ?: CalibrationDetails.DEFAULT_CALIBRATION_INTERVAL,
                 null
             ) else CalibrationDetails(null, null, null, null)
         val maintenanceRecord =
             MaintenanceRecord(MaintenanceEvent(Status.WORKING, LocalDate.now()), null, calibrationDetails, null)
         val asset = Asset(
-            assetRequest.name, assetRequest.location, assetRequest.identityNo, assetRequest.auInventoryNo,
-            assetRequest.isConsumable, mfrInfo, quantity, maintenanceRecord, assetRequest.notes
+            newAssetRequest.name, newAssetRequest.location, newAssetRequest.identityNo, newAssetRequest.auInventoryNo,
+            newAssetRequest.isConsumable, mfrInfo, quantity, maintenanceRecord, newAssetRequest.notes
         )
-        assetRequest.keywords?.forEach(asset::addKeyword)
-        assetRequest.images?.forEach(asset::addImage)
-        val cost = assetRequest.cost ?: 0.00
-        val unitPrice = assetRequest.unitPrice ?: (cost / quantity.value)
-        if (assetRequest.vendor != null) {
+        newAssetRequest.keywords?.forEach(asset::addKeyword)
+        newAssetRequest.images?.forEach(asset::addImage)
+        val cost = newAssetRequest.cost ?: 0.00
+        val unitPrice = newAssetRequest.unitPrice ?: (cost / quantity.value)
+        if (newAssetRequest.vendor != null) {
             asset.addPurchase(
                 Purchase(
                     Vendor(
-                        assetRequest.vendor,
-                        if (assetRequest.vendorURL == null) null else URL(assetRequest.vendorURL)
+                        newAssetRequest.vendor,
+                        if (newAssetRequest.vendorURL == null) null else URL(newAssetRequest.vendorURL)
                     ),
-                    assetRequest.purchaseDate,
+                    newAssetRequest.purchaseDate,
                     cost,
                     unitPrice,
                     quantity,
-                    if (assetRequest.purchaseURL == null) null else URL(assetRequest.purchaseURL),
-                    assetRequest.receipt
+                    if (newAssetRequest.purchaseURL == null) null else URL(newAssetRequest.purchaseURL),
+                    newAssetRequest.receipt
                 )
             )
         }
@@ -138,17 +137,43 @@ class AssetService @Autowired constructor(
     fun deleteAsset(id: String, authorizationToken: AuthorizationToken) : Boolean {
         logger.info("[Asset Service] Deleting asset with id: {}", id)
         val claims = authorizationToken.getClaims(secretKey)
-        if (!(claims.body["roles"] as String).contains("admin")) return false
+        if (!authService.doesUserHaveElevatedPrivileges(authorizationToken)) return false
         val assets = getAssets(listOf(id))
         if (assets.isEmpty()) throw AssetNotFoundException(id)
         assetDAO.delete(assets[0], claims.body.subject)
         return true
     }
 
+    fun updateAsset(updateAssetRequest: UpdateAssetRequest, authorizationToken: AuthorizationToken): ObjectId? {
+        logger.info("[Asset Service] Updating asset with id: {}", updateAssetRequest.id)
+        var irregularLocationDoc: IrregularLocation? = null
+
+        // validate location
+        if (updateAssetRequest.location != null) {
+            val user = authorizationToken.getClaims(secretKey).body.subject
+            val isAdmin = authService.isUserAdmin(authorizationToken)
+            val validLocation = validateLocation(updateAssetRequest.location)
+            val irregularLocation = !validLocation && !isAdmin
+            if (irregularLocation) {
+                val future = assetDAO.findAssetsByID(listOf(updateAssetRequest.id))
+                val assets = future.get() ?: ArrayList()
+                if (assets.isEmpty()) throw InvalidAssetRequestException("id")
+                irregularLocationDoc = IrregularLocation()
+                    .assetID(updateAssetRequest.id)
+                    .location(updateAssetRequest.location)
+                    .user(user)
+                    .previousLocation(assets[0].location)
+                updateAssetRequest.location = "//Pending approval//"
+            }
+        }
+
+        return assetDAO.update(Asset.fromUpdateRequest(updateAssetRequest), irregularLocationDoc)
+    }
+
     companion object {
         private val logger: Logger = LogManager.getLogger()
         private val searchParameters: HashMap<String, (String) -> Bson> = HashMap()
-        private val skippedParameters: Array<String> = arrayOf("limit", "offset")
+        private val skippedSearchParameters: HashSet<String> = hashSetOf("limit", "offset")
 
         init {
             this.searchParameters["search"] = { value -> text(value) }

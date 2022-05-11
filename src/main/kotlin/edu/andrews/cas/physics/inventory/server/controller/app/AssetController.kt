@@ -2,7 +2,8 @@ package edu.andrews.cas.physics.inventory.server.controller.app
 
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
 import edu.andrews.cas.physics.inventory.server.model.app.asset.Asset
-import edu.andrews.cas.physics.inventory.server.request.app.AssetRequest
+import edu.andrews.cas.physics.inventory.server.request.app.NewAssetRequest
+import edu.andrews.cas.physics.inventory.server.request.app.UpdateAssetRequest
 import edu.andrews.cas.physics.inventory.server.response.app.InsertedAssetResponse
 import edu.andrews.cas.physics.inventory.server.service.app.AssetService
 import org.apache.logging.log4j.LogManager
@@ -39,23 +40,31 @@ class AssetController @Autowired constructor(private val assetService: AssetServ
         return ResponseEntity.ok(assets)
     }
 
-    @PostMapping("/add")
+    @PostMapping("/asset")
     fun add(
         @RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken,
-        @RequestBody assetRequest: AssetRequest,
+        @RequestBody newAssetRequest: NewAssetRequest,
     ): ResponseEntity<InsertedAssetResponse> {
-        logger.info("[Asset Controller] Received request to add asset: {}", assetRequest)
-        val result = assetService.addAsset(assetRequest, jwt)
+        logger.info("[Asset Controller] Received request to add asset: {}", newAssetRequest)
+        val result = assetService.addAsset(newAssetRequest, jwt)
         return ResponseEntity.status(201).body(InsertedAssetResponse(result.first.toString(), result.second))
     }
 
     @DeleteMapping("/asset")
     fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken,
                @RequestParam id: String) : ResponseEntity<Any> {
+        logger.info("[Asset Controller] Received request to delete asset {}", id)
         return if (assetService.deleteAsset(id, jwt)) ResponseEntity.accepted().build()
         else ResponseEntity.status(401).build()
     }
 
+    @PutMapping("/asset")
+    fun update(@RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken,
+               @RequestBody updateAssetRequest: UpdateAssetRequest) : ResponseEntity<Any> {
+        logger.info("[Asset Controller] Received request to update asset: {}", )
+        val objectID = assetService.updateAsset(updateAssetRequest, jwt)
+        return if (objectID == null) ResponseEntity.ok().build() else ResponseEntity.accepted().body(objectID.toHexString())
+    }
 
     companion object {
         private val logger: Logger = LogManager.getLogger()

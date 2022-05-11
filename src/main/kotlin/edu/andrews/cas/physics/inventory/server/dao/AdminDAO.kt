@@ -7,7 +7,7 @@ import edu.andrews.cas.physics.inventory.server.exception.AlreadyRegisteredExcep
 import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
 import edu.andrews.cas.physics.inventory.server.model.UserStatus
 import edu.andrews.cas.physics.inventory.server.reactive.InsertOneBooleanResponse
-import edu.andrews.cas.physics.inventory.server.reactive.UpdateResponse
+import edu.andrews.cas.physics.inventory.server.reactive.UpdateBooleanResponse
 import edu.andrews.cas.physics.inventory.server.reactive.UserFinder
 import edu.andrews.cas.physics.inventory.server.repository.model.User
 import edu.andrews.cas.physics.inventory.server.request.user.UserRole
@@ -38,7 +38,8 @@ class AdminDAO @Autowired constructor(private val mongodb: MongoDatabase, privat
     fun addUserRole(userRole: UserRole) {
         logger.info("[Admin DAO] Adding role '{}' to user '{}'", userRole.role, userRole.username)
         val future = CompletableFuture<Boolean>()
-        val response = UpdateResponse(future)
+        val response =
+            UpdateBooleanResponse(future)
         val collection = mongodb.getCollection(USER_COLLECTION)
         collection.updateOne(eq("username", userRole.username), addToSet("roles", userRole.role)).subscribe(response)
         future.whenCompleteAsync { _, _ -> }
@@ -47,7 +48,8 @@ class AdminDAO @Autowired constructor(private val mongodb: MongoDatabase, privat
     fun removeUserRole(userRole: UserRole) {
         logger.info("[Admin DAO] Removing role '{}' from user '{}'", userRole.role, userRole.username)
         val future = CompletableFuture<Boolean>()
-        val response = UpdateResponse(future)
+        val response =
+            UpdateBooleanResponse(future)
         val collection = mongodb.getCollection(USER_COLLECTION)
         collection.updateOne(eq("username", userRole.username), pull("roles", userRole.role)).subscribe(response)
         future.whenCompleteAsync { _, _ -> }
@@ -56,7 +58,8 @@ class AdminDAO @Autowired constructor(private val mongodb: MongoDatabase, privat
     fun setUserStatus(username: String, status: UserStatus) {
         logger.info("[Admin DAO] Setting status for user '{}' as '{}'", username, status)
         val future = CompletableFuture<Boolean>()
-        val response = UpdateResponse(future)
+        val response =
+            UpdateBooleanResponse(future)
         val collection = mongodb.getCollection(USER_COLLECTION)
         collection.updateOne(eq("username", username), set("status", status.name)).subscribe(response)
         future.whenCompleteAsync { _, _ -> }
