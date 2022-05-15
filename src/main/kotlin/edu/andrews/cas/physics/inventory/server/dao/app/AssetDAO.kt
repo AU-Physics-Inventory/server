@@ -93,7 +93,14 @@ class AssetDAO @Autowired constructor(private val mongodb: MongoDatabase) {
                 val d = f.get()
                 d[0].getObjectId("_id")
             }
-        } else null
+        } else {
+            val fut = CompletableFuture<Boolean>()
+            val res = DeleteOneBooleanResponse(fut)
+            val col = mongodb.getCollection(IRREGULAR_LOCATIONS_COLLECTION)
+            col.deleteOne(eq("assetID", asset._id)).subscribe(res)
+            fut.whenCompleteAsync { _, _ -> }
+            null
+        }
     }
 
     companion object {
