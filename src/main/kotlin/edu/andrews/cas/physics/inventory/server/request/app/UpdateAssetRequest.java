@@ -8,7 +8,6 @@ import java.util.List;
 public class UpdateAssetRequest {
     @JsonProperty(required = true)
     private String id;
-
     private String name;
     private String location;
     private List<String> keywords;
@@ -16,6 +15,10 @@ public class UpdateAssetRequest {
     private String AUInventoryNo;
     private boolean consumable;
     private String notes;
+    private String brand;
+    private String model;
+    private String partNo;
+    private String serialNo;
 
     public String getId() {
         return id;
@@ -81,6 +84,38 @@ public class UpdateAssetRequest {
         this.notes = notes;
     }
 
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getPartNo() {
+        return partNo;
+    }
+
+    public void setPartNo(String partNo) {
+        this.partNo = partNo;
+    }
+
+    public String getSerialNo() {
+        return serialNo;
+    }
+
+    public void setSerialNo(String serialNo) {
+        this.serialNo = serialNo;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -92,6 +127,10 @@ public class UpdateAssetRequest {
                 .append("AUInventoryNo", AUInventoryNo)
                 .append("consumable", consumable)
                 .append("notes", notes)
+                .append("brand", brand)
+                .append("model", model)
+                .append("partNo", partNo)
+                .append("serialNo", serialNo)
                 .toString();
     }
 }

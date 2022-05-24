@@ -1,7 +1,6 @@
 package edu.andrews.cas.physics.inventory.server.model.app.asset;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.mongodb.client.model.Updates;
 import edu.andrews.cas.physics.inventory.measurement.Quantity;
 import edu.andrews.cas.physics.inventory.server.exception.InvalidAssetRequestException;
 import edu.andrews.cas.physics.inventory.server.model.app.IDocumentConversion;
@@ -84,7 +83,8 @@ public class Asset implements IDocumentConversion {
                     .identityNo(request.getIdentityNo())
                     .AUInventoryNo(request.getAUInventoryNo())
                     .consumable(request.isConsumable())
-                    .notes(request.getNotes());
+                    .notes(request.getNotes())
+                    .manufacturerInfo(new ManufacturerInfo(request.getBrand(), request.getModel(), request.getPartNo(), request.getSerialNo()));
         } catch (IllegalArgumentException e) {
             throw new InvalidAssetRequestException("id");
         }
@@ -263,6 +263,13 @@ public class Asset implements IDocumentConversion {
         if (getAUInventoryNo() != null) updates.add(set("AUInventoryNo", getAUInventoryNo()));
         if (isConsumable() != null) updates.add(set("consumable", isConsumable()));
         if (getNotes() != null) updates.add(set("notes", getNotes()));
+        if (getManufacturerInfo() != null) {
+            ManufacturerInfo mfrInfo = getManufacturerInfo();
+            if (mfrInfo.getBrand() != null) updates.add(set("mfrInfo.brand", mfrInfo.getBrand()));
+            if (mfrInfo.getModel() != null) updates.add(set("mfrInfo.model", mfrInfo.getModel()));
+            if (mfrInfo.getPartNo() != null) updates.add(set("mfrInfo.partNo", mfrInfo.getPartNo()));
+            if (mfrInfo.getSerialNo() != null) updates.add(set("mfrInfo.serialNo", mfrInfo.getSerialNo()));
+        }
         return combine(updates);
     }
 }
