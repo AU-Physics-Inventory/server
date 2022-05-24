@@ -103,6 +103,19 @@ class AssetDAO @Autowired constructor(private val mongodb: MongoDatabase) {
         }
     }
 
+    fun update(id: ObjectId, updates: Bson) {
+        logger.info(
+            "[Asset DAO] Updating asset with id '{}' using the following bson: {}",
+            id.toHexString(),
+            updates.toString()
+        )
+        val fut = CompletableFuture<Boolean>()
+        val res = UpdateBooleanResponse(fut)
+        val col = mongodb.getCollection(ASSET_COLLECTION)
+        col.updateOne(eq("_id", id), updates).subscribe(res)
+        fut.whenCompleteAsync { _, _ -> }
+    }
+
     companion object {
         private val logger: Logger = LogManager.getLogger()
         private const val ASSET_COLLECTION = "assets"

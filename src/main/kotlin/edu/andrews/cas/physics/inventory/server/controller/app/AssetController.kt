@@ -59,11 +59,24 @@ class AssetController @Autowired constructor(private val assetService: AssetServ
     }
 
     @PutMapping("/asset")
-    fun update(@RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken,
-               @RequestBody updateAssetRequest: UpdateAssetRequest) : ResponseEntity<Any> {
-        logger.info("[Asset Controller] Received request to update asset: {}", )
+    fun update(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken,
+        @RequestBody updateAssetRequest: UpdateAssetRequest
+    ): ResponseEntity<Any> {
+        logger.info("[Asset Controller] Received request to update asset: {}")
         val objectID = assetService.updateAsset(updateAssetRequest, jwt)
-        return if (objectID == null) ResponseEntity.ok().build() else ResponseEntity.accepted().body(objectID.toHexString())
+        return if (objectID == null) ResponseEntity.ok().build() else ResponseEntity.accepted()
+            .body(objectID.toHexString())
+    }
+
+    @PostMapping("/asset/keywords")
+    fun addKeywords(
+        @RequestParam id: String,
+        @RequestBody keywords: List<String>
+    ): ResponseEntity<Any> {
+        logger.info("[Asset Controller] Received request to add keywords to asset '{}': {}", id, keywords)
+        assetService.addKeywords(id, keywords)
+        return ResponseEntity.accepted().build()
     }
 
     companion object {

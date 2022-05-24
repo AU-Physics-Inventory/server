@@ -1,6 +1,7 @@
 package edu.andrews.cas.physics.inventory.server.service.app
 
 import com.mongodb.client.model.Filters.*
+import com.mongodb.client.model.Updates.addEachToSet
 import edu.andrews.cas.physics.inventory.measurement.Quantity
 import edu.andrews.cas.physics.inventory.measurement.Unit
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
@@ -168,6 +169,17 @@ class AssetService @Autowired constructor(
         }
 
         return assetDAO.update(Asset.fromUpdateRequest(updateAssetRequest), irregularLocationDoc)
+    }
+
+    fun addKeywords(id: String, keywords: List<String>) {
+        logger.info("[Asset Service] Adding keywords to asset {}", id)
+        try {
+            val objectId = ObjectId(id)
+            val bson = addEachToSet("keywords", keywords)
+            assetDAO.update(objectId, bson)
+        } catch (e: IllegalArgumentException) {
+            throw InvalidAssetRequestException("id");
+        }
     }
 
     companion object {
