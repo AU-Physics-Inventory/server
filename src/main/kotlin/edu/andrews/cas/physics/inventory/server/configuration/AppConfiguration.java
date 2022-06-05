@@ -1,7 +1,8 @@
-package edu.andrews.cas.physics.inventory.server.util.app;
+package edu.andrews.cas.physics.inventory.server.configuration;
 
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import edu.andrews.cas.physics.inventory.server.reactive.DocumentFinder;
+import edu.andrews.cas.physics.inventory.server.util.app.AppConstants;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

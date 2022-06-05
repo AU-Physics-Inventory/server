@@ -1,5 +1,11 @@
-package edu.andrews.cas.physics.inventory.server.util
+package edu.andrews.cas.physics.inventory.server.configuration
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider
+import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
+import com.amazonaws.regions.Regions
+import com.amazonaws.services.s3.AmazonS3
+import com.amazonaws.services.s3.AmazonS3Client
 import edu.andrews.cas.physics.inventory.server.interceptor.AuthenticationInterceptor
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
@@ -17,7 +23,8 @@ import javax.mail.PasswordAuthentication
 import javax.mail.Session
 
 @Configuration
-open class Configuration @Autowired constructor(private val authenticationInterceptor: AuthenticationInterceptor) : WebMvcConfigurer {
+open class ServerConfiguration @Autowired constructor(private val authenticationInterceptor: AuthenticationInterceptor) :
+    WebMvcConfigurer {
     @Primary
     @Bean("configProperties")
     open fun configProperties(): Properties {
@@ -43,9 +50,23 @@ open class Configuration @Autowired constructor(private val authenticationInterc
     open fun emailSession(@Qualifier("emailProperties") mailConfig: Properties): Session {
         return Session.getInstance(mailConfig, object : Authenticator() {
             override fun getPasswordAuthentication(): PasswordAuthentication {
-                return PasswordAuthentication(mailConfig.getProperty("mail.smtp.user"), mailConfig.getProperty("mail.smtp.password"))
+                return PasswordAuthentication(
+                    mailConfig.getProperty("mail.smtp.user"),
+                    mailConfig.getProperty("mail.smtp.password")
+                )
             }
         })
+    }
+
+    @Bean
+    open fun digitalOceanSpaces(@Qualifier("configProperties") config: Properties): AmazonS3 {
+        val endpoint = config.getProperty("spaces.endpoint")
+        val secret = config.getProperty("spaces.secret")
+        val key = ("spaces.key")
+        return AmazonS3Client.builder()
+            .withEndpointConfiguration(EndpointConfiguration(endpoint, Regions.US_EAST_1.getName()))
+            .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(key, secret)))
+            .build()
     }
 
     override fun addInterceptors(registry: InterceptorRegistry) {

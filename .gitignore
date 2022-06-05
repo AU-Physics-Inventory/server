@@ -36,6 +36,6 @@ build/
 .mvn/
 mvnw*
 
-src/main/kotlin/edu/andrews/cas/physics/inventory/server/service/AuthenticationService.kt
+src/main/kotlin/edu/andrews/cas/physics/inventory/server/service/authentication/AuthenticationService.kt
 src/main/resources/config.properties
 src/main/resources/email.properties

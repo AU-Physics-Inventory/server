@@ -1,11 +1,11 @@
-package edu.andrews.cas.physics.inventory.server.controller
+package edu.andrews.cas.physics.inventory.server.controller.authentication
 
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
-import edu.andrews.cas.physics.inventory.server.request.user.UserLogin
-import edu.andrews.cas.physics.inventory.server.service.AuthenticationService
-import edu.andrews.cas.physics.inventory.server.request.user.UserRegistration
 import edu.andrews.cas.physics.inventory.server.exception.DatabaseException
+import edu.andrews.cas.physics.inventory.server.request.user.UserLogin
+import edu.andrews.cas.physics.inventory.server.request.user.UserRegistration
 import edu.andrews.cas.physics.inventory.server.response.ErrorResponse
+import edu.andrews.cas.physics.inventory.server.service.authentication.AuthenticationService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired

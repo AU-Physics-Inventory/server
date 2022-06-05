@@ -2,6 +2,7 @@ package edu.andrews.cas.physics.inventory.server.service.app
 
 import com.mongodb.client.model.Filters.*
 import com.mongodb.client.model.Updates.addEachToSet
+import com.mongodb.client.model.Updates.set
 import edu.andrews.cas.physics.inventory.measurement.Quantity
 import edu.andrews.cas.physics.inventory.measurement.Unit
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
@@ -19,9 +20,9 @@ import edu.andrews.cas.physics.inventory.server.model.app.asset.maintenance.Main
 import edu.andrews.cas.physics.inventory.server.model.app.asset.maintenance.MaintenanceRecord
 import edu.andrews.cas.physics.inventory.server.model.app.asset.maintenance.Status
 import edu.andrews.cas.physics.inventory.server.repository.model.IrregularLocation
-import edu.andrews.cas.physics.inventory.server.request.app.NewAssetRequest
-import edu.andrews.cas.physics.inventory.server.request.app.UpdateAssetRequest
-import edu.andrews.cas.physics.inventory.server.service.AuthenticationService
+import edu.andrews.cas.physics.inventory.server.request.app.asset.NewAssetRequest
+import edu.andrews.cas.physics.inventory.server.request.app.asset.UpdateAssetRequest
+import edu.andrews.cas.physics.inventory.server.service.authentication.AuthenticationService
 import edu.andrews.cas.physics.inventory.server.util.ConversionHelper
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -171,15 +172,20 @@ class AssetService @Autowired constructor(
         return assetDAO.update(Asset.fromUpdateRequest(updateAssetRequest), irregularLocationDoc)
     }
 
-    fun addKeywords(id: String, keywords: List<String>) {
+    fun addKeywords(id: ObjectId, keywords: List<String>) {
         logger.info("[Asset Service] Adding keywords to asset {}", id)
-        try {
-            val objectId = ObjectId(id)
-            val bson = addEachToSet("keywords", keywords)
-            assetDAO.update(objectId, bson)
-        } catch (e: IllegalArgumentException) {
-            throw InvalidAssetRequestException("id");
-        }
+        val bson = addEachToSet("keywords", keywords)
+        assetDAO.update(id, bson)
+    }
+
+    fun deleteKeywords(id: ObjectId, keywords: List<String>) {
+        logger.info("[Asset Service] Deleting keywords from asset {}", id)
+        val assets = getAssets(listOf(id.toString()))
+        if (assets.isEmpty()) throw AssetNotFoundException(id)
+        val assetKeywords = assets[0].keywords;
+        assetKeywords.removeAll(keywords)
+        val bson = set("keywords", assetKeywords);
+        assetDAO.update(id, bson)
     }
 
     companion object {

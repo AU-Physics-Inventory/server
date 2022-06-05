@@ -6,7 +6,7 @@ import edu.andrews.cas.physics.inventory.server.exception.InvalidAssetRequestExc
 import edu.andrews.cas.physics.inventory.server.model.app.IDocumentConversion;
 import edu.andrews.cas.physics.inventory.server.model.app.asset.accountability.AccountabilityReports;
 import edu.andrews.cas.physics.inventory.server.model.app.asset.maintenance.MaintenanceRecord;
-import edu.andrews.cas.physics.inventory.server.request.app.UpdateAssetRequest;
+import edu.andrews.cas.physics.inventory.server.request.app.asset.UpdateAssetRequest;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;

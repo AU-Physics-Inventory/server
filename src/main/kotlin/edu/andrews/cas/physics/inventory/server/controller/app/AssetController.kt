@@ -1,13 +1,16 @@
 package edu.andrews.cas.physics.inventory.server.controller.app
 
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
+import edu.andrews.cas.physics.inventory.server.exception.InvalidAssetRequestException
 import edu.andrews.cas.physics.inventory.server.model.app.asset.Asset
-import edu.andrews.cas.physics.inventory.server.request.app.NewAssetRequest
-import edu.andrews.cas.physics.inventory.server.request.app.UpdateAssetRequest
+import edu.andrews.cas.physics.inventory.server.request.app.asset.NewAssetRequest
+import edu.andrews.cas.physics.inventory.server.request.app.asset.PatchKeywordsRequest
+import edu.andrews.cas.physics.inventory.server.request.app.asset.UpdateAssetRequest
 import edu.andrews.cas.physics.inventory.server.response.app.InsertedAssetResponse
 import edu.andrews.cas.physics.inventory.server.service.app.AssetService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
@@ -69,14 +72,24 @@ class AssetController @Autowired constructor(private val assetService: AssetServ
             .body(objectID.toHexString())
     }
 
-    @PostMapping("/asset/keywords")
-    fun addKeywords(
-        @RequestParam id: String,
-        @RequestBody keywords: List<String>
-    ): ResponseEntity<Any> {
-        logger.info("[Asset Controller] Received request to add keywords to asset '{}': {}", id, keywords)
-        assetService.addKeywords(id, keywords)
-        return ResponseEntity.accepted().build()
+    @PatchMapping("/asset/keywords")
+    fun patchKeywords(@RequestBody request: PatchKeywordsRequest): ResponseEntity<Any> {
+        logger.info("[Asset Controller] Received request to patch keywords: {}", request)
+        if (request.assetID.isNullOrBlank()) throw InvalidAssetRequestException("id")
+        if (request.keywords.isNullOrEmpty()) throw InvalidAssetRequestException("keywords")
+        try {
+            val id = ObjectId(request.assetID)
+            when (request.patchOption) {
+                PatchKeywordsRequest.Option.ADD -> assetService.addKeywords(id, request.keywords)
+                PatchKeywordsRequest.Option.REMOVE -> assetService.deleteKeywords(id, request.keywords)
+                null -> throw InvalidAssetRequestException("patchOption")
+            }
+            return ResponseEntity.accepted().build()
+        } catch (e: IllegalArgumentException) {
+            logger.error("Unable to parse objectId '{}'", request.assetID)
+            logger.error(e)
+            throw InvalidAssetRequestException("id")
+        }
     }
 
     companion object {

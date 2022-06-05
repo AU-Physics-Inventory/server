@@ -1,4 +1,4 @@
-package edu.andrews.cas.physics.inventory.server.controller
+package edu.andrews.cas.physics.inventory.server.controller.users
 
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyRegisteredException
 import edu.andrews.cas.physics.inventory.server.model.User
@@ -6,8 +6,8 @@ import edu.andrews.cas.physics.inventory.server.model.UserStatus
 import edu.andrews.cas.physics.inventory.server.request.user.ChangeUserStatusRequest
 import edu.andrews.cas.physics.inventory.server.request.user.UserInvitation
 import edu.andrews.cas.physics.inventory.server.request.user.UserRole
-import edu.andrews.cas.physics.inventory.server.service.AdminService
-import edu.andrews.cas.physics.inventory.server.service.AuthenticationService
+import edu.andrews.cas.physics.inventory.server.service.authentication.AuthenticationService
+import edu.andrews.cas.physics.inventory.server.service.users.AdminService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,4 +1,4 @@
-package edu.andrews.cas.physics.inventory.server.repository;
+package edu.andrews.cas.physics.inventory.server.configuration;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Properties;
 
 @Configuration
-public class MongoDBDataSource {
+public class MongoDBConfiguration {
     private static final Logger logger = LogManager.getLogger();
 
     @Bean
@@ -29,11 +29,6 @@ public class MongoDBDataSource {
         String DB_CONNECTION_URL = String.format("%s://%s:%s@%s/%s?authSource=%s&tls=true", DB_PROTOCOL, USERNAME, PASSWORD, DB_HOST, AUTH_DB, AUTH_DB);
 
         logger.info("Connecting to MongoDB using URL: {}", DB_CONNECTION_URL);
-
-        System.setProperty("javax.net.ssl.keyStore", config.getProperty("truststore.path"));
-        System.setProperty("javax.net.ssl.keyStorePassword", config.getProperty("truststore.pass"));
-        System.setProperty("javax.net.ssl.trustStore", config.getProperty("truststore.path"));
-        System.setProperty("javax.net.ssl.trustStorePassword", config.getProperty("truststore.pass"));
 
         MongoClientSettings settings = MongoClientSettings.builder()
                 .applyToSslSettings(builder -> builder.enabled(true))

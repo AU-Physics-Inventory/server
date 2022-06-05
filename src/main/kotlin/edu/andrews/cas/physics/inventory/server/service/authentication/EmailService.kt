@@ -1,4 +1,4 @@
-package edu.andrews.cas.physics.inventory.server.service
+package edu.andrews.cas.physics.inventory.server.service.authentication
 
 import edu.andrews.cas.physics.inventory.server.dao.UserDAO
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyVerifiedException

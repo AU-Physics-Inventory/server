@@ -1,7 +1,7 @@
-package edu.andrews.cas.physics.inventory.server.controller
+package edu.andrews.cas.physics.inventory.server.controller.authentication
 
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyVerifiedException
-import edu.andrews.cas.physics.inventory.server.service.EmailService
+import edu.andrews.cas.physics.inventory.server.service.authentication.EmailService
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger

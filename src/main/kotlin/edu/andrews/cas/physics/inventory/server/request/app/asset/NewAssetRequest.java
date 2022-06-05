@@ -1,4 +1,4 @@
-package edu.andrews.cas.physics.inventory.server.request.app;
+package edu.andrews.cas.physics.inventory.server.request.app.asset;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;

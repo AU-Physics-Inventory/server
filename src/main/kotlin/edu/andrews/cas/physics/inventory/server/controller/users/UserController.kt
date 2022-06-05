@@ -1,14 +1,17 @@
-package edu.andrews.cas.physics.inventory.server.controller
+package edu.andrews.cas.physics.inventory.server.controller.users
 
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
-import edu.andrews.cas.physics.inventory.server.service.UserService
+import edu.andrews.cas.physics.inventory.server.service.users.UserService
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
 @RequestMapping("/user")
