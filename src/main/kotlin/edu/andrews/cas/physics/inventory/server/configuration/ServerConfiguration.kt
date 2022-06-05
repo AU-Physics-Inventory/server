@@ -39,7 +39,7 @@ open class ServerConfiguration @Autowired constructor(private val authentication
     }
 
     @Bean("emailProperties")
-    open fun emailProperties() : Properties {
+    open fun emailProperties(): Properties {
         val mailConfig = Properties()
         mailConfig.load(ClassLoader.getSystemResourceAsStream("email.properties"))
         return mailConfig
@@ -62,7 +62,7 @@ open class ServerConfiguration @Autowired constructor(private val authentication
     open fun digitalOceanSpaces(@Qualifier("configProperties") config: Properties): AmazonS3 {
         val endpoint = config.getProperty("spaces.endpoint")
         val secret = config.getProperty("spaces.secret")
-        val key = ("spaces.key")
+        val key = config.getProperty("spaces.key")
         return AmazonS3Client.builder()
             .withEndpointConfiguration(EndpointConfiguration(endpoint, Regions.US_EAST_1.getName()))
             .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(key, secret)))

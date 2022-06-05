@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import edu.andrews.cas.physics.inventory.server.dao.app.AssetDAO;
+import lombok.NonNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,7 +40,7 @@ public class FileStorageService {
         logger.warn(System.getProperty("javax.net.ssl.trustStore"));
     }
 
-    public String storeImage(ObjectId id, MultipartFile file) throws IOException, SdkClientException {
+    public String storeImage(@NonNull ObjectId id, @NonNull MultipartFile file) throws IOException, SdkClientException {
         logger.info("Storing image for asset with id '{}'", id.toString());
         String fileName = storeFile("images", file);
         Bson bson = addToSet("images", fileName);
@@ -47,38 +48,39 @@ public class FileStorageService {
         return fileName;
     }
 
-    public String storeFile(String folder, MultipartFile file) throws IOException, SdkClientException {
+    private String storeFile(@NonNull String folder, @NonNull MultipartFile file) throws IOException, SdkClientException {
         String fileName;
 
         try {
             fileName = generateFileName(folder);
         } catch (SdkClientException e) {
-            logger.error("Error connecting to S3 bucket", e);
+            logger.error("An S3 error occurred", e);
             throw e;
         }
 
+        File tempFile = File.createTempFile(fileName, null);
         try {
             logger.info("Transferring image to temporary file...");
-            File tempFile = File.createTempFile(fileName, null);
             file.transferTo(tempFile);
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentType(file.getContentType());
             String bucketName = String.format("%s/%s", spaceName, folder);
             logger.info("Uploading file to S3 bucket - DigitalOcean Spaces - at bucket {}", bucketName);
             spaces.putObject(new PutObjectRequest(bucketName, fileName, tempFile).withCannedAcl(CannedAccessControlList.PublicRead).withMetadata(metadata));
-            tempFile.delete();
         } catch (IOException e) {
             logger.error("Error creating temporary file", e);
             throw e;
         } catch (SdkClientException e) {
             logger.error("Error uploading file to S3 bucket", e);
             throw e;
+        } finally {
+            tempFile.delete();
         }
 
         return fileName;
     }
 
-    private String generateFileName(String folder) throws SdkClientException {
+    private String generateFileName(@NonNull String folder) throws SdkClientException {
         logger.info("Generating file name...");
         String fileName;
         do {
@@ -89,3 +91,4 @@ public class FileStorageService {
         return fileName;
     }
 }
+
