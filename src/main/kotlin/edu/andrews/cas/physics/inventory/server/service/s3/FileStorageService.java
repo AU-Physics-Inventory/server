@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import edu.andrews.cas.physics.inventory.server.dao.app.AssetDAO;
+import edu.andrews.cas.physics.inventory.server.dao.app.ManualsDAO;
 import lombok.NonNull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -22,18 +23,21 @@ import java.io.IOException;
 import java.util.Properties;
 
 import static com.mongodb.client.model.Updates.addToSet;
+import static com.mongodb.client.model.Updates.set;
 
 @Service
 public class FileStorageService {
     private static final Logger logger = LogManager.getLogger();
     private final AmazonS3 spaces;
     private final AssetDAO assetDAO;
+    private final ManualsDAO manualsDAO;
     private final String spaceName;
 
     @Autowired
-    public FileStorageService(AmazonS3 spaces, AssetDAO assetDAO, @Qualifier("configProperties") Properties config) {
+    public FileStorageService(AmazonS3 spaces, AssetDAO assetDAO, ManualsDAO manualsDAO, @Qualifier("configProperties") Properties config) {
         this.spaces = spaces;
         this.assetDAO = assetDAO;
+        this.manualsDAO = manualsDAO;
         this.spaceName = config.getProperty("spaces.name");
 
         logger.warn(System.getProperty("javax.net.ssl.keyStore"));
@@ -88,6 +92,14 @@ public class FileStorageService {
             logger.info("Checking if file name '{}' is valid...", fileName);
         } while (this.spaces.doesObjectExist(String.format("%s/%s", this.spaceName, folder), fileName));
         logger.info("Found valid file name: {}", fileName);
+        return fileName;
+    }
+
+    public String storeManual(@NonNull Integer identityNo, @NonNull MultipartFile file) throws IOException, SdkClientException {
+        logger.info("Storing manual for IdentityNo '{}'", identityNo.toString());
+        String fileName = storeFile("manuals", file);
+        Bson bson = set("softcopy", fileName);
+        manualsDAO.update(identityNo, bson);
         return fileName;
     }
 }

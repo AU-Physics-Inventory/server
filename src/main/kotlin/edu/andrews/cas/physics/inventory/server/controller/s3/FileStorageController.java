@@ -44,4 +44,19 @@ public class FileStorageController {
             return ResponseEntity.internalServerError().body("An error occurred while communicating with the file storage service.");
         }
     }
+
+    @PostMapping("/app/assets/asset/manuals")
+    public ResponseEntity<Object> uploadManual(@RequestParam Integer identityNo, @RequestParam MultipartFile manual) {
+        logger.info("Received request to upload receipt file for IdentityNo'{}'", identityNo);
+        try {
+            String fileName = fileStorageService.storeManual(identityNo, manual);
+            return ResponseEntity.ok(fileName);
+        } catch (IOException e) {
+            logger.error("Returning HTTP 500 - Internal Server Error");
+            return ResponseEntity.internalServerError().body("An error occurred receiving the uploaded receipt.");
+        } catch (SdkClientException e) {
+            logger.error("Returning HTTP 500 - Internal Server Error");
+            return ResponseEntity.internalServerError().body("An error occurred while communicating with the file storage service.");
+        }
+    }
 }
