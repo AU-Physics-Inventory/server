@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.util.*
@@ -28,7 +29,7 @@ open class ServerConfiguration @Autowired constructor(private val authentication
     @Primary
     @Bean("configProperties")
     open fun configProperties(): Properties {
-        val config = Properties()
+        config = Properties()
         config.load(ClassLoader.getSystemResourceAsStream("config.properties"))
         return config
     }
@@ -71,5 +72,13 @@ open class ServerConfiguration @Autowired constructor(private val authentication
 
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(authenticationInterceptor)
+    }
+
+    override fun addCorsMappings(registry: CorsRegistry) {
+        registry.addMapping("/*").allowedOrigins(config["webapp.host"] as String?)
+    }
+
+    companion object {
+        private lateinit var config: Properties
     }
 }
