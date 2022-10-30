@@ -75,7 +75,8 @@ open class ServerConfiguration @Autowired constructor(private val authentication
     }
 
     override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/*").allowedOrigins(config["webapp.host"] as String?)
+        registry.addMapping("/**")
+            .allowedOrigins(config["webapp.host"] as String?)
     }
 
     companion object {
