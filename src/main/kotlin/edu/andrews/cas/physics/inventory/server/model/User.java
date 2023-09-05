@@ -3,6 +3,8 @@ package edu.andrews.cas.physics.inventory.server.model;
 import java.util.List;
 
 public class User {
+    private final String firstName;
+    private final String lastName;
     private final String username;
     private final String email;
     private final boolean emailVerified;
@@ -21,6 +23,16 @@ public class User {
         this.lastSuccess = user.getLastAuthenticationSuccess();
         this.roles = user.getRoles();
         this.status = user.getStatus();
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public String getUsername() {

@@ -26,7 +26,12 @@ class UserController @Autowired constructor(private val userService: UserService
     @PostMapping("/changePassword")
     fun changePassword(@RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken, @RequestBody password: String) : ResponseEntity<Any> {
         logger.info("[User Controller] Received request to update password")
-        userService.changePassword(jwt, password)
+        try {
+            userService.changePassword(jwt, password)
+        } catch (e: IllegalArgumentException) {
+            logger.error(e)
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.accepted().build()
     }
 

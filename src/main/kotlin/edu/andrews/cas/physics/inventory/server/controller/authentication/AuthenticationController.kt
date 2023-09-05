@@ -35,7 +35,7 @@ class AuthenticationController @Autowired constructor(private val authentication
     fun register(@RequestBody registration: UserRegistration) : ResponseEntity<Any> {
         return try {
             val response = this.authenticationService.registerUser(registration)
-            ResponseEntity.status(if (response.isSuccess) HttpStatus.OK else HttpStatus.BAD_REQUEST).body(response)
+            ResponseEntity.status(if (response.isValid && response.isUnique) HttpStatus.OK else HttpStatus.BAD_REQUEST).body(response)
         } catch (e: DatabaseException) {
             logger.error(e)
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse("Unable to register user", "An unexpected database error occurred"))
@@ -51,18 +51,24 @@ class AuthenticationController @Autowired constructor(private val authentication
 
     @GetMapping("/resetPassword")
     fun resetPassword(@RequestParam("id") userIdentification: String, @RequestParam("type") identificationType: String) : ResponseEntity<Any> {
-        logger.info("[Auth Controller] Received password reset GET request", identificationType, userIdentification)
+        logger.info("[Auth Controller] Received password reset GET request for user '{}' with identification type '{}'", identificationType, userIdentification)
         if (identificationType != "email" && identificationType != "username") return ResponseEntity.badRequest().body("Type must be either 'email' or 'username'")
         logger.info("[Auth Controller] Requesting a password reset for user with {}: {}", identificationType, userIdentification)
         authenticationService.resetPassword(userIdentification, identificationType)
         return ResponseEntity.accepted().build()
     }
 
-    @PostMapping("/resetPassword")
+    //@PostMapping("/resetPassword") todo implement more robust password resetting
     fun resetPassword(userLogin: UserLogin) : ResponseEntity<Any> {
         logger.info("[Auth Controller] Received password reset POST request for user: {}", userLogin.username)
         authenticationService.setPassword(userLogin.username, userLogin.password)
         return ResponseEntity.accepted().build()
+    }
+
+    @GetMapping("/validate")
+    fun validateUser() : ResponseEntity<Any> {
+        logger.info("[Auth Controller] Validating JWT")
+        return ResponseEntity.ok().build()
     }
 
     companion object {

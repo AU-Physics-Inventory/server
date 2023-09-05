@@ -19,9 +19,9 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.util.*
 import javax.crypto.SecretKey
-import javax.mail.Authenticator
-import javax.mail.PasswordAuthentication
-import javax.mail.Session
+import jakarta.mail.Authenticator
+import jakarta.mail.PasswordAuthentication
+import jakarta.mail.Session
 
 @Configuration
 open class ServerConfiguration @Autowired constructor(private val authenticationInterceptor: AuthenticationInterceptor) :

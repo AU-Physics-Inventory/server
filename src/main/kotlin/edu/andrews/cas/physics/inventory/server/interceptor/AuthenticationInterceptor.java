@@ -14,8 +14,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.crypto.SecretKey;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
@@ -37,7 +37,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         var requestURI = request.getRequestURI();
         if (request.getMethod().equalsIgnoreCase("options")) return true;
         if (requestURI.startsWith("/admin")) return isUserAdmin(request, response);
-        if (requestURI.startsWith("/user") || requestURI.startsWith("/app")) return isUserLoggedIn(request, response);
+        if (requestURI.startsWith("/user") || requestURI.startsWith("/app") || requestURI.equals("/validate")) return isUserLoggedIn(request, response);
         return true;
     }
 

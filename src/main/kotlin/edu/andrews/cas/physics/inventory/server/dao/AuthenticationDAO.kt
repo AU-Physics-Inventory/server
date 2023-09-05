@@ -31,9 +31,9 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
         val usersWithUsername = userDAO.findUserByName(userRegistration.username).get()
         val emailTaken = usersWithEmail.isNotEmpty()
         val usernameTaken = usersWithUsername.isNotEmpty()
-        val response = RegistrationResponse(usernameTaken, emailTaken)
-        logger.info("[Auth DAO] Registration of user '{}' successful? {}", userRegistration.username, response.isSuccess)
-        if (response.isSuccess) {
+        val response = RegistrationResponse(true, true, true, true,true, !usernameTaken, !emailTaken)
+        logger.info("[Auth DAO] Registration of user '{}' successful? {}", userRegistration.username, response.isValid)
+        if (response.isUnique) {
             val future = CompletableFuture<Boolean>()
             val insertResponse = InsertOneBooleanResponse(future)
             val collection = mongodb.getCollection(AUTH_COLLECTION)
@@ -42,6 +42,8 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
                 .email(userRegistration.email)
                 .username(userRegistration.username)
                 .password(userRegistration.password)
+                .firstName(userRegistration.firstName)
+                .lastName(userRegistration.lastName)
                 .salt(salt)
                 .build()
             collection.insertOne(userDocument).subscribe(insertResponse)
@@ -56,7 +58,7 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
         val users = userDAO.findUserByEmail(userRegistration.email).get()
         if (users.isEmpty() || !users[0].accessCode.equals(userRegistration.accessCode)) throw RegistrationNotFoundException()
         if (users[0].status != UserStatus.PENDING) throw AlreadyRegisteredException()
-        if (userDAO.findUserByName(userRegistration.username).get().isNotEmpty()) return RegistrationResponse(true, false)
+        if (userDAO.findUserByName(userRegistration.username).get().isNotEmpty()) return RegistrationResponse(true, true, true, true,true,false, true)
         val user = users[0].username(userRegistration.username).password(userRegistration.password).salt(salt).status(UserStatus.ACTIVE).emailVerified(userRegistration.isFromEmailLink)
         val future = CompletableFuture<Boolean>()
         val response =
@@ -65,7 +67,7 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
         collection.replaceOne(eq("email", userRegistration.email), user.build()).subscribe(response)
         val ack = future.get()
         if (!ack.equals(true)) throw DatabaseException()
-        return RegistrationResponse(false, false)
+        return RegistrationResponse(true, true, true, true, true, true, true)
     }
 
     fun loginAttempt(user: String, valid: Boolean) {

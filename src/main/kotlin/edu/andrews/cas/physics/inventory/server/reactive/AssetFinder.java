@@ -1,7 +1,6 @@
 package edu.andrews.cas.physics.inventory.server.reactive;
 
 import edu.andrews.cas.physics.inventory.server.model.app.asset.Asset;
-import edu.andrews.cas.physics.inventory.server.repository.model.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.Document;

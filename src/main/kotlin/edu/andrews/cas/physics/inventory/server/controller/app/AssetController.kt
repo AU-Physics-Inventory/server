@@ -66,7 +66,7 @@ class AssetController @Autowired constructor(private val assetService: AssetServ
         @RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken,
         @RequestBody updateAssetRequest: UpdateAssetRequest
     ): ResponseEntity<Any> {
-        logger.info("[Asset Controller] Received request to update asset: {}")
+        logger.info("[Asset Controller] Received request to update asset: {}", updateAssetRequest)
         val objectID = assetService.updateAsset(updateAssetRequest, jwt)
         return if (objectID == null) ResponseEntity.ok().build() else ResponseEntity.accepted()
             .body(objectID.toHexString())

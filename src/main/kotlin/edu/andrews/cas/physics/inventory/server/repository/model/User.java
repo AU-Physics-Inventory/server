@@ -64,15 +64,35 @@ public class User implements RepositoryModel {
         return this;
     }
 
+    public User firstName(String firstName) {
+        userDocument.append("firstName", firstName);
+        return this;
+    }
+
+    public User lastName(String lastName) {
+        userDocument.append("lastName", lastName);
+        return this;
+    }
+
     public Document build() throws Exception {
         if (!this.userDocument.containsKey("roles")) this.roles(null);
         if (this.userDocument.containsKey("status")
                 && this.userDocument.containsKey("username")
                 && this.userDocument.containsKey("email")
                 && this.userDocument.containsKey("password")
-                && this.userDocument.containsKey("salt"))
+                && this.userDocument.containsKey("salt")
+                && this.userDocument.containsKey("firstName")
+                && this.userDocument.containsKey("lastName"))
             return this.userDocument;
         throw new InvalidUserDocumentException();
+    }
+
+    public String getFirstName() {
+        return userDocument.getString("firstName");
+    }
+
+    public String getLastName() {
+        return userDocument.getString("lastName");
     }
 
     public UserStatus getStatus() {

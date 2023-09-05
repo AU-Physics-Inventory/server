@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture
 
 @Component
 class ManualsDAO @Autowired constructor(private val mongodb: MongoDatabase) {
-    fun update(identityNo: Integer, updates: Bson) {
+    fun update(identityNo: Int, updates: Bson) {
         logger.info(
             "[Manuals DAO] Updating identityNo '{}' using the following bson: {}",
             identityNo,

@@ -1,6 +1,8 @@
 package edu.andrews.cas.physics.inventory.server.request.user;
 
 public class UserRegistration {
+    private String firstName;
+    private String lastName;
     private String email;
     private String username;
     private String password;
@@ -11,12 +13,30 @@ public class UserRegistration {
 
     }
 
-    public UserRegistration(String email, String username, String password, String accessCode, boolean fromEmailLink) {
+    public UserRegistration(String firstName, String lastName, String email, String username, String password, String accessCode, boolean fromEmailLink) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
         this.username = username;
         this.password = password;
         this.accessCode = accessCode;
         this.fromEmailLink = fromEmailLink;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getUsername() {

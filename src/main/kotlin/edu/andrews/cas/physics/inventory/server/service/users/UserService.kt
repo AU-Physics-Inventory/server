@@ -22,16 +22,10 @@ class UserService @Autowired constructor(
         val claims = jwt.getClaims(secretKey)
         val user = claims.body.subject
         logger.info("[User Service] Handling request to update email for user '{}' to '{}'", user, email)
-        emailService.validateEmailAddress(email)
+        emailService.parseEmailAddress(email)
         userDAO.updateEmail(user, email)
         emailService.sendEmailVerificationEmail(
-            UserRegistration(
-                email,
-                user,
-                null,
-                null,
-                false
-            )
+            UserRegistration(null, null, email, user, null, null, false)
         )
     }
 

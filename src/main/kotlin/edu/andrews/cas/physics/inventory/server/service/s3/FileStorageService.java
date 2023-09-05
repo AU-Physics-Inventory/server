@@ -39,9 +39,9 @@ public class FileStorageService {
         this.assetDAO = assetDAO;
         this.manualsDAO = manualsDAO;
         this.spaceName = config.getProperty("spaces.name");
-
-        logger.warn(System.getProperty("javax.net.ssl.keyStore"));
-        logger.warn(System.getProperty("javax.net.ssl.trustStore"));
+//      TODO REMOVE THIS CODE
+//        logger.warn(System.getProperty("javax.net.ssl.keyStore"));
+//        logger.warn(System.getProperty("javax.net.ssl.trustStore"));
     }
 
     public String storeImage(@NonNull ObjectId id, @NonNull MultipartFile file) throws IOException, SdkClientException {
