@@ -89,9 +89,12 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
                 inc("failedAttempts", 1),
                 set("lastAttempt", now)))
             .subscribe(response)
+        // todo fix this
+        // this is getting the pre-update document and checking the failed attempts
+        // we should be looking to get post-update document for this, or some other alternative
         future.whenCompleteAsync { d, _ ->
             run {
-                if (d != null && d.getInteger("failedAttempts") >= Constants.MAX_FAILED_LOGIN_ATTEMPTS) {
+                if (d != null && d.getInteger("failedAttempts") >= Constants.MAX_FAILED_LOGIN_ATTEMPTS - 1) {
                     val future2 = CompletableFuture<Boolean>()
                     val response2 =
                         UpdateBooleanResponse(
