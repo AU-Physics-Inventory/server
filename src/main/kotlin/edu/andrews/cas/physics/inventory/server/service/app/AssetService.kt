@@ -8,7 +8,7 @@ import edu.andrews.cas.physics.inventory.measurement.Unit
 import edu.andrews.cas.physics.inventory.server.auth.AuthorizationToken
 import edu.andrews.cas.physics.inventory.server.dao.app.AssetDAO
 import edu.andrews.cas.physics.inventory.server.exception.AssetNotFoundException
-import edu.andrews.cas.physics.inventory.server.exception.DuplicateSearchParameter
+import edu.andrews.cas.physics.inventory.server.exception.DuplicateSearchParameterException
 import edu.andrews.cas.physics.inventory.server.exception.InvalidAssetRequestException
 import edu.andrews.cas.physics.inventory.server.exception.InvalidSearchParametersException
 import edu.andrews.cas.physics.inventory.server.model.app.asset.Asset
@@ -67,7 +67,7 @@ class AssetService @Autowired constructor(
                     if (!map.contains(param)) map[param] = searchParameters[param]?.let { it(value) }!!
                     else {
                         logger.error("[Asset Service] Duplicate parameter '{}' received in query.", param)
-                        throw DuplicateSearchParameter(param)
+                        throw DuplicateSearchParameterException(param)
                     }
                 } else if (!skippedSearchParameters.contains(param)) {
                     logger.error("[Asset Service] Search parameter '{}' is not a valid search parameter.", param)

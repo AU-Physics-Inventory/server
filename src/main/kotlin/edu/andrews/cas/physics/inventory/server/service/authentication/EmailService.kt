@@ -5,6 +5,12 @@ import edu.andrews.cas.physics.inventory.server.exception.AlreadyVerifiedExcepti
 import edu.andrews.cas.physics.inventory.server.exception.NoSuchUserException
 import edu.andrews.cas.physics.inventory.server.repository.model.User
 import edu.andrews.cas.physics.inventory.server.request.user.UserRegistration
+import jakarta.mail.Message
+import jakarta.mail.Session
+import jakarta.mail.Transport
+import jakarta.mail.internet.AddressException
+import jakarta.mail.internet.InternetAddress
+import jakarta.mail.internet.MimeMessage
 import org.apache.commons.io.FileUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -15,12 +21,6 @@ import java.io.File
 import java.nio.charset.Charset
 import java.time.Instant
 import java.util.*
-import jakarta.mail.Message
-import jakarta.mail.Session
-import jakarta.mail.Transport
-import jakarta.mail.internet.AddressException
-import jakarta.mail.internet.InternetAddress
-import jakarta.mail.internet.MimeMessage
 
 @Service
 class EmailService @Autowired constructor(
@@ -98,7 +98,7 @@ class EmailService @Autowired constructor(
     }
 
     fun parseEmailAddress(emailAddress: String): InternetAddress {
-        logger.info("[Email Service] Validating email address: {}", emailAddress)
+        logger.info("[Email Service] Parsing email address: {}", emailAddress)
         if (validateEmailAddress(emailAddress)) return InternetAddress.parse(emailAddress)[0]
         else throw AddressException()
     }
