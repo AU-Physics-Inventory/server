@@ -3,6 +3,8 @@ package edu.andrews.cas.physics.inventory.server.interceptor;
 import edu.andrews.cas.physics.inventory.server.auth.LoggedInUsers;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import kotlin.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,8 +16,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.crypto.SecretKey;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
@@ -79,6 +79,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             return new Pair<>(true, claims);
         } catch (Exception e) {
             logger.info("[Auth Interceptor] User is not authenticated. Either Authorization token is malformed or missing, or user is no longer logged in.");
+            logger.error(e);
             return new Pair<>(false, null);
         }
     }
