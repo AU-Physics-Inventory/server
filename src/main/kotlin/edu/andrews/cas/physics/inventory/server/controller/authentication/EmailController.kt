@@ -14,6 +14,9 @@ import java.nio.charset.Charset
 
 @Controller
 class EmailController @Autowired constructor(private val emailService: EmailService) {
+
+    //TODO: Implement better email verification API
+    //it should not be that easy that you can send a GET request with the username as a param
     @GetMapping("/verifyEmail")
     @ResponseBody
     fun verifyEmail(@RequestParam username: String) : String {
