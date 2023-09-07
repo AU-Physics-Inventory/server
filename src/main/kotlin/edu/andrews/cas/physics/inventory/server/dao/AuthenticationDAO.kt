@@ -1,6 +1,8 @@
 package edu.andrews.cas.physics.inventory.server.dao
 
 import com.mongodb.client.model.Filters.eq
+import com.mongodb.client.model.FindOneAndUpdateOptions
+import com.mongodb.client.model.ReturnDocument
 import com.mongodb.client.model.Updates.*
 import com.mongodb.reactivestreams.client.MongoDatabase
 import edu.andrews.cas.physics.inventory.server.exception.AlreadyRegisteredException
@@ -76,25 +78,32 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
         val future = CompletableFuture<Document>()
         val response = FindOneAndUpdateResponse(future)
         val now = LocalDateTime.now()
+
+        val updateOptions = FindOneAndUpdateOptions()
+        updateOptions.returnDocument(ReturnDocument.AFTER)
+
         if (valid) collection.findOneAndUpdate(
             eq("username", user),
             combine(
                 set("failedAttempts", 0),
                 set("lastAttempt", now),
-                set("lastSuccess", now)))
+                set("lastSuccess", now)
+            ),
+            updateOptions
+        )
             .subscribe(response)
         else collection.findOneAndUpdate(
             eq("username", user),
             combine(
                 inc("failedAttempts", 1),
-                set("lastAttempt", now)))
+                set("lastAttempt", now)
+            ),
+            updateOptions
+        )
             .subscribe(response)
-        // todo fix this
-        // this is getting the pre-update document and checking the failed attempts
-        // we should be looking to get post-update document for this, or some other alternative
         future.whenCompleteAsync { d, _ ->
             run {
-                if (d != null && d.getInteger("failedAttempts") >= Constants.MAX_FAILED_LOGIN_ATTEMPTS - 1) {
+                if (d != null && d.getInteger("failedAttempts") >= Constants.MAX_FAILED_LOGIN_ATTEMPTS) {
                     val future2 = CompletableFuture<Boolean>()
                     val response2 =
                         UpdateBooleanResponse(
