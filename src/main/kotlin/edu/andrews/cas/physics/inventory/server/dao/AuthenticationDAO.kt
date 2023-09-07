@@ -131,7 +131,17 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
         val response =
             UpdateBooleanResponse(future)
         val collection = mongodb.getCollection(AUTH_COLLECTION)
-        collection.updateOne(combine(eq("username", user), eq("status", UserStatus.LOCKED.name)), set("status", UserStatus.ACTIVE.name)).subscribe(response)
+        collection.updateOne(
+            combine(
+                eq("username", user),
+                eq("status", UserStatus.LOCKED.name)
+            ),
+            combine(
+                set("status", UserStatus.ACTIVE.name),
+                set("failedAttempts", 0)
+            )
+        )
+            .subscribe(response)
         future.whenCompleteAsync { _, _ ->  }
     }
 

@@ -61,7 +61,9 @@ class AdminDAO @Autowired constructor(private val mongodb: MongoDatabase, privat
         val response =
             UpdateBooleanResponse(future)
         val collection = mongodb.getCollection(USER_COLLECTION)
-        collection.updateOne(eq("username", username), set("status", status.name)).subscribe(response)
+        val statusUpdate = set("status", status.name)
+        val update = if (status == UserStatus.ACTIVE) combine(statusUpdate, set("failedAttempts", 0)) else statusUpdate
+        collection.updateOne(eq("username", username), update).subscribe(response)
         future.whenCompleteAsync { _, _ -> }
     }
 
