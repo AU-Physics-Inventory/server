@@ -31,7 +31,7 @@ class AssetDAO @Autowired constructor(private val mongodb: MongoDatabase) {
 
     fun search(filters: Map<String, Bson>, limit: Int?, offset: Int?): CompletableFuture<List<Document>> {
         logger.info("[Asset DAO] Performing search using given filters.")
-        val limit = limit ?: 10
+        val limit = limit ?: 25
         val offset = offset ?: 0
         val future = CompletableFuture<List<Document>>()
         val finder = DocumentFinder(future)

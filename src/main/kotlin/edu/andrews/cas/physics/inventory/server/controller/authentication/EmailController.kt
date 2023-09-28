@@ -7,18 +7,16 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.io.File
 import java.nio.charset.Charset
 
-@Controller
+@RestController
 class EmailController @Autowired constructor(private val emailService: EmailService) {
 
     //TODO: Implement better email verification API
     //it should not be that easy that you can send a GET request with the username as a param
     @GetMapping("/verifyEmail")
-    @ResponseBody
     fun verifyEmail(@RequestParam username: String) : String {
         logger.info("[Email Controller] Received e-mail verification request from user {}", username)
         return try {

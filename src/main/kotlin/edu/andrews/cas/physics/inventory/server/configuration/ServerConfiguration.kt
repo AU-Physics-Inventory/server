@@ -9,6 +9,9 @@ import com.amazonaws.services.s3.AmazonS3Client
 import edu.andrews.cas.physics.inventory.server.interceptor.AuthenticationInterceptor
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
+import jakarta.mail.Authenticator
+import jakarta.mail.PasswordAuthentication
+import jakarta.mail.Session
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
@@ -19,9 +22,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.util.*
 import javax.crypto.SecretKey
-import jakarta.mail.Authenticator
-import jakarta.mail.PasswordAuthentication
-import jakarta.mail.Session
 
 @Configuration
 open class ServerConfiguration @Autowired constructor(private val authenticationInterceptor: AuthenticationInterceptor) :
@@ -76,7 +76,7 @@ open class ServerConfiguration @Autowired constructor(private val authentication
 
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
-            .allowedOrigins(config["webapp.host"] as String?)
+            .allowedOrigins("http://localhost:3000", config["webapp.host"] as String?)
     }
 
     companion object {

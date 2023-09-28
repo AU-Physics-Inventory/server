@@ -1,6 +1,8 @@
 package edu.andrews.cas.physics.inventory.server.model.app.asset;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import edu.andrews.cas.physics.inventory.measurement.Quantity;
 import edu.andrews.cas.physics.inventory.server.exception.InvalidAssetRequestException;
 import edu.andrews.cas.physics.inventory.server.model.app.IDocumentConversion;
@@ -17,6 +19,7 @@ import java.util.List;
 import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.set;
 
+@JsonPropertyOrder("id")
 public class Asset implements IDocumentConversion {
     private ObjectId _id = null;
     private String name;
@@ -213,11 +216,12 @@ public class Asset implements IDocumentConversion {
         if (!this.purchases.contains(purchase)) this.purchases.add(purchase);
     }
 
+    @JsonIgnore
     public ObjectId get_id() {
         return _id;
     }
 
-    @JsonGetter("_id")
+    @JsonGetter("id")
     public String getId() {
         return get_id().toString();
     }
