@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/user")
@@ -15,7 +16,7 @@ class UserController @Autowired constructor(private val userService: UserService
     @PostMapping("/changeEmail")
     fun changeEmail(@RequestHeader(HttpHeaders.AUTHORIZATION) jwt: AuthorizationToken, @RequestBody email: String) : ResponseEntity<Any> {
         logger.info("[User Controller] Received request to change e-mail")
-        userService.changeEmail(jwt, email)
+        userService.changeEmail(jwt, email.lowercase(Locale.getDefault()))
         return ResponseEntity.accepted().build()
     }
 

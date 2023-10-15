@@ -16,8 +16,8 @@ public class UserRegistration {
     public UserRegistration(String firstName, String lastName, String email, String username, String password, String accessCode, boolean fromEmailLink) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.email = email;
-        this.username = username;
+        this.setEmail(email);
+        this.setUsername(username);
         this.password = password;
         this.accessCode = accessCode;
         this.fromEmailLink = fromEmailLink;
@@ -44,7 +44,7 @@ public class UserRegistration {
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.username = username.toLowerCase();
     }
 
     public String getPassword() {
@@ -60,7 +60,7 @@ public class UserRegistration {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = email.toLowerCase();
     }
 
     public String getAccessCode() {
