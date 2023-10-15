@@ -8,11 +8,14 @@ import com.mongodb.reactivestreams.client.MongoDatabase
 import edu.andrews.cas.physics.inventory.server.model.app.asset.Asset
 import edu.andrews.cas.physics.inventory.server.reactive.*
 import edu.andrews.cas.physics.inventory.server.repository.model.IrregularLocation
+import edu.andrews.cas.physics.inventory.server.util.app.AppConstants
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.bson.Document
 import org.bson.conversions.Bson
 import org.bson.types.ObjectId
+import org.reactivestreams.Subscriber
+import org.reactivestreams.Subscription
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -29,16 +32,46 @@ class AssetDAO @Autowired constructor(private val mongodb: MongoDatabase) {
         return future
     }
 
-    fun search(filters: Map<String, Bson>, limit: Int?, offset: Int?): CompletableFuture<List<Document>> {
+    fun search(
+        filters: Map<String, Bson>,
+        limit: Int?,
+        offset: Int?
+    ): Pair<CompletableFuture<Long>, CompletableFuture<List<Asset>>> {
         logger.info("[Asset DAO] Performing search using given filters.")
-        val limit = limit ?: 25
-        val offset = offset ?: 0
-        val future = CompletableFuture<List<Document>>()
-        val finder = DocumentFinder(future)
         val collection = mongodb.getCollection(ASSET_COLLECTION)
-        val publisher = if (filters.isEmpty()) collection.find() else collection.find(and(filters.values))
-        publisher.limit(limit).skip(offset).subscribe(finder)
-        return future
+
+        val counterFuture = CompletableFuture<Long>()
+        val counterSubscriber = object : Subscriber<Long> {
+            override fun onSubscribe(s: Subscription?) {
+                s?.request(1)
+            }
+
+            override fun onError(t: Throwable?) {
+                counterFuture.completeExceptionally(t)
+            }
+
+            override fun onComplete() {
+                counterFuture.complete(null)
+            }
+
+            override fun onNext(t: Long?) {
+                counterFuture.complete(t)
+            }
+        }
+        val counterPublisher =
+            if (filters.isEmpty()) collection.countDocuments() else collection.countDocuments(and(filters.values))
+        counterPublisher.subscribe(counterSubscriber)
+
+        val finderFuture = CompletableFuture<List<Asset>>()
+        val finderSubscriber = AssetFinder(finderFuture)
+        val limit = if (limit == null) AppConstants.DEFAULT_DB_QUERY_LIMIT
+        else if (limit > AppConstants.MAX_DB_QUERY_LIMIT) AppConstants.MAX_DB_QUERY_LIMIT
+        else limit
+        val offset = (offset ?: 0) * limit
+        val finderPublisher = if (filters.isEmpty()) collection.find() else collection.find(and(filters.values))
+        finderPublisher.limit(limit).skip(offset).subscribe(finderSubscriber)
+
+        return Pair(counterFuture, finderFuture)
     }
 
     fun insert(asset: Asset, irregularLocation: IrregularLocation? = null) : ObjectId {

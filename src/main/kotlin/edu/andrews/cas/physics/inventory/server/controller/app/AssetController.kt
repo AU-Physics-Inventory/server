@@ -6,6 +6,7 @@ import edu.andrews.cas.physics.inventory.server.model.app.asset.Asset
 import edu.andrews.cas.physics.inventory.server.request.app.asset.NewAssetRequest
 import edu.andrews.cas.physics.inventory.server.request.app.asset.PatchKeywordsRequest
 import edu.andrews.cas.physics.inventory.server.request.app.asset.UpdateAssetRequest
+import edu.andrews.cas.physics.inventory.server.response.app.AssetSearchResponse
 import edu.andrews.cas.physics.inventory.server.response.app.InsertedAssetResponse
 import edu.andrews.cas.physics.inventory.server.service.app.AssetService
 import org.apache.logging.log4j.LogManager
@@ -35,7 +36,7 @@ class AssetController @Autowired constructor(private val assetService: AssetServ
     }
 
     @GetMapping
-    fun search(@RequestParam params: Map<String, String>): ResponseEntity<List<Asset>> {
+    fun search(@RequestParam params: Map<String, String>): ResponseEntity<AssetSearchResponse> {
         logger.info("[Asset Controller] Received search request: {}", params.toString())
         // todo catch number format exception
         val assets = assetService.search(params)

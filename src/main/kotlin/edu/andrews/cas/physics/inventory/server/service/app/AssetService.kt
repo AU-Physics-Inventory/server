@@ -22,6 +22,7 @@ import edu.andrews.cas.physics.inventory.server.model.app.asset.maintenance.Stat
 import edu.andrews.cas.physics.inventory.server.repository.model.IrregularLocation
 import edu.andrews.cas.physics.inventory.server.request.app.asset.NewAssetRequest
 import edu.andrews.cas.physics.inventory.server.request.app.asset.UpdateAssetRequest
+import edu.andrews.cas.physics.inventory.server.response.app.AssetSearchResponse
 import edu.andrews.cas.physics.inventory.server.service.authentication.AuthenticationService
 import edu.andrews.cas.physics.inventory.server.util.ConversionHelper
 import org.apache.logging.log4j.LogManager
@@ -47,15 +48,19 @@ class AssetService @Autowired constructor(
         return assetsFuture.get() ?: ArrayList()
     }
 
-    fun search(params: Map<String, String>): List<Asset> {
+    fun search(params: Map<String, String>): AssetSearchResponse {
         logger.info("[Asset Service] Servicing search request: {}", params)
         val filters = validateSearchParams(params)
         val limit = params["limit"]?.toInt()
         val offset = params["offset"]?.toInt()
-        val assetsFuture = assetDAO.search(filters, limit, offset)
+        val results = assetDAO.search(filters, limit, offset)
+
+        val counterFuture = results.first
+        val assetsFuture = results.second
         val assets = assetsFuture.get() ?: ArrayList()
+        val count = counterFuture.get() ?: assets.size.toLong()
         logger.info("[Asset Service] Retrieved {} documents matching query.", assets.size)
-        return assets.parallelStream().map { a -> Asset.fromDocument(a) }.toList()
+        return AssetSearchResponse(count, assets)
     }
 
     private fun validateSearchParams(params: Map<String, String>): Map<String, Bson> {
