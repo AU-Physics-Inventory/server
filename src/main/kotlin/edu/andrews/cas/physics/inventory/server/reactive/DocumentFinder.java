@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class DocumentFinder extends Subscriber<List<Document>, Document> {
-    private Subscription subscription;
     private final ArrayList<Document> documents;
 
     public DocumentFinder(CompletableFuture<List<Document>> documentFuture) {
@@ -18,14 +17,12 @@ public class DocumentFinder extends Subscriber<List<Document>, Document> {
 
     @Override
     public void onSubscribe(Subscription s) {
-        this.subscription = s;
-        this.subscription.request(1);
+        s.request(Long.MAX_VALUE);
     }
 
     @Override
     public void onNext(Document d) {
         this.documents.add(d);
-        this.subscription.request(1);
     }
 
     @Override
