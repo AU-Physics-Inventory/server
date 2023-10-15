@@ -200,13 +200,13 @@ class AssetService @Autowired constructor(
 
         init {
             this.searchParameters["search"] = { value -> text(value) }
-            this.searchParameters["location"] = { value -> eq("location", value) }
+            this.searchParameters["location"] = { value -> regex("location", "^%s".format(value)) }
             this.searchParameters["AUInventoryNo"] = { value -> eq("AUInventoryNo", value) }
             this.searchParameters["identityNo"] = { value -> eq("identityNo", value.toInt()) }
             this.searchParameters["brand"] = { value -> eq("mfrInfo.brand", value) }
             this.searchParameters["model"] = { value -> eq("mfrInfo.model", value) }
             this.searchParameters["partNo"] = { value -> eq("mfrInfo.partNo", value) }
-            this.searchParameters["serial"] = { value -> eq("mfrInfo.serialNo", value) }
+            this.searchParameters["serialNo"] = { value -> eq("mfrInfo.serialNo", value) }
             this.searchParameters["vendor"] = { value -> eq("purchases.vendor.name", value) }
             this.searchParameters["status"] =
                 { value -> eq("maintenanceRecord.currentStatus.status", Status.lookup(value).code) }
