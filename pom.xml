@@ -10,8 +10,8 @@
     </parent>
     <groupId>edu.andrews.cas.physics.inventory</groupId>
     <artifactId>server</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <version>0.0.1</version>
+    <packaging>jar</packaging>
     <name>server</name>
     <description>server</description>
     <properties>
@@ -145,6 +145,13 @@
             <artifactId>jaxb-api</artifactId>
             <version>2.3.1</version>
         </dependency>
+        <!-- TODO REMOVE THIS IN PROD-->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+        <!-- ******************** -->
     </dependencies>
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
