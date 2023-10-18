@@ -14,9 +14,11 @@ import jakarta.mail.PasswordAuthentication
 import jakarta.mail.Session
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.core.io.ClassPathResource
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
@@ -24,13 +26,16 @@ import java.util.*
 import javax.crypto.SecretKey
 
 @Configuration
-open class ServerConfiguration @Autowired constructor(private val authenticationInterceptor: AuthenticationInterceptor) :
+open class ServerConfiguration @Autowired constructor(
+    private val authenticationInterceptor: AuthenticationInterceptor,
+    @Value("\${spring.profiles.active}") private val activeProfile: String
+) :
     WebMvcConfigurer {
     @Primary
     @Bean("configProperties")
     open fun configProperties(): Properties {
         config = Properties()
-        config.load(ClassLoader.getSystemResourceAsStream("config.properties"))
+        config.load(ClassPathResource("config-%s.properties".format(activeProfile)).inputStream)
         return config
     }
 
@@ -42,7 +47,7 @@ open class ServerConfiguration @Autowired constructor(private val authentication
     @Bean("emailProperties")
     open fun emailProperties(): Properties {
         val mailConfig = Properties()
-        mailConfig.load(ClassLoader.getSystemResourceAsStream("email.properties"))
+        mailConfig.load(ClassPathResource("email-%s.properties".format(activeProfile)).inputStream)
         return mailConfig
     }
 
