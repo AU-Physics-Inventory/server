@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -22,6 +23,8 @@ import java.io.IOException;
 public class AuthenticationInterceptor implements HandlerInterceptor {
     private static final Logger logger = LogManager.getLogger();
 
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
     private final SecretKey secretKey;
     private final LoggedInUsers loggedInUsers;
 
@@ -33,6 +36,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
+        if (activeProfile.equals("local")) {
+            logger.info("[Auth Interceptor -- Pre-Handle] Bypassing authentication checker");
+            return true;
+        }
+
         logger.info("[Auth Interceptor -- Pre-Handle] Checking request authentication at endpoint {}", request.getRequestURI());
         var requestURI = request.getRequestURI();
         if (request.getMethod().equalsIgnoreCase("options")) return true;
