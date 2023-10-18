@@ -34,8 +34,12 @@ open class AuthenticationDAO @Autowired constructor(private val mongodb: MongoDa
         val emailTaken = usersWithEmail.isNotEmpty()
         val usernameTaken = usersWithUsername.isNotEmpty()
         val response = RegistrationResponse(true, true, true, true,true, !usernameTaken, !emailTaken)
-        logger.info("[Auth DAO] Registration of user '{}' successful? {}", userRegistration.username, response.isValid)
-        if (response.isUnique) {
+        logger.info(
+            "[Auth DAO] Registration of user '{}' successful? {}",
+            userRegistration.username,
+            response.isValid && response.isUnique
+        )
+        if (response.isValid && response.isUnique) {
             val future = CompletableFuture<Boolean>()
             val insertResponse = InsertOneBooleanResponse(future)
             val collection = mongodb.getCollection(AUTH_COLLECTION)
