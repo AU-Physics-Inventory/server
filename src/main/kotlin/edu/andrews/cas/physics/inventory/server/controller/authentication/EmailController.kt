@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.io.File
 import java.nio.charset.Charset
 
 @RestController
@@ -24,12 +23,12 @@ class EmailController @Autowired constructor(private val emailService: EmailServ
             emailService.verifyEmail(username)
             FileUtils
                 .readFileToString(
-                    File(ClassPathResource("templates/web/email_verification_successful.html").uri),
+                    ClassPathResource("templates/web/email_verification_successful.html").file,
                     Charset.forName("UTF-8"))
         } catch (e: AlreadyVerifiedException) {
             FileUtils
                 .readFileToString(
-                    File(ClassPathResource("templates/web/email_already_verified.html").uri),
+                    ClassPathResource("templates/web/email_already_verified.html").file,
                     Charset.forName("UTF-8"))
         }
     }
