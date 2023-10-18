@@ -11,14 +11,13 @@ import jakarta.mail.Transport
 import jakarta.mail.internet.AddressException
 import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeMessage
-import org.apache.commons.io.FileUtils
+import org.apache.commons.io.IOUtils
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Service
-import java.io.File
 import java.nio.charset.Charset
 import java.time.Instant
 import java.util.*
@@ -32,8 +31,8 @@ class EmailService @Autowired constructor(
 ) {
     fun sendEmailVerificationEmail(userRegistration: UserRegistration) {
         logger.info("[Email Service] Sending welcome email to user {}", userRegistration.username)
-        val template = FileUtils.readFileToString(
-            File(ClassPathResource("templates/email/verify_email.html").uri),
+        val template = IOUtils.toString(
+            ClassPathResource("templates/email/verify_email.html").inputStream,
                 Charset.forName("UTF-8")
             )
         val htmlString = template.replace(
@@ -60,12 +59,10 @@ class EmailService @Autowired constructor(
 
     fun sendPreRegisteredUserRegistrationSuccessEmail(emailAddress: String) {
         logger.info("[Email Service] Sending verification success email to address {}", emailAddress)
-        val template = FileUtils.readFileToString(
-                File(
-                    ClassPathResource("templates/email/preregistered_user_registration_success_email.html").uri
-                ),
+        val template = IOUtils.toString(
+            ClassPathResource("templates/email/preregistered_user_registration_success_email.html").inputStream,
             Charset.forName("UTF-8")
-            )
+        )
         val subject = "Welcome to Physics Inventory"
         sendMessage(parseEmailAddress(emailAddress), subject, template)
     }
@@ -76,12 +73,10 @@ class EmailService @Autowired constructor(
             email,
             accessCode
         )
-        val template = FileUtils.readFileToString(
-                File(
-                    ClassPathResource("templates/email/registration_invitation.html").uri
-                ),
+        val template = IOUtils.toString(
+            ClassPathResource("templates/email/registration_invitation.html").inputStream,
             Charset.forName("UTF-8")
-            )
+        )
         val htmlString = template.replace(
                 "{{URL}}",
                 String.format("%s/register?email=%s&accessCode=%s", config["webapp.host"], email, accessCode),
@@ -114,10 +109,10 @@ class EmailService @Autowired constructor(
 
     private fun sendVerificationSuccessEmail(emailAddress: String) {
         logger.info("[Email Service] Sending verification success email to address {}", emailAddress)
-        val template = FileUtils.readFileToString(
-            File(ClassPathResource("templates/email/email_verification_success_email.html").uri),
-                Charset.forName("UTF-8")
-            )
+        val template = IOUtils.toString(
+            ClassPathResource("templates/email/email_verification_success_email.html").inputStream,
+            Charset.forName("UTF-8")
+        )
         val subject = "Welcome to Physics Inventory"
         sendMessage(parseEmailAddress(emailAddress), subject, template)
     }
