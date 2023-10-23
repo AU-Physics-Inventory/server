@@ -4,6 +4,7 @@ import edu.andrews.cas.physics.inventory.server.exception.InvalidUserDocumentExc
 import edu.andrews.cas.physics.inventory.server.model.UserStatus;
 import org.bson.Document;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,8 @@ public class User implements RepositoryModel {
                 .append("lastSuccess", null)
                 .append("failedAttempts", 0)
                 .append("emailVerified", false)
-                .append("accessCode", null);
+                .append("accessCode", null)
+                .append("registrationDate", LocalDateTime.now());
     }
 
     public User(Document userDocument) {
