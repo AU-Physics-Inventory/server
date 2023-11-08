@@ -5,7 +5,6 @@ import edu.andrews.cas.physics.inventory.measurement.OperationOnQuantitiesExcept
 import edu.andrews.cas.physics.inventory.measurement.Quantity;
 import edu.andrews.cas.physics.inventory.measurement.Unit;
 import edu.andrews.cas.physics.inventory.server.model.app.IDocumentConversion;
-import edu.andrews.cas.physics.inventory.server.model.app.asset.Asset;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -77,7 +76,11 @@ public class AccountabilityReports implements IDocumentConversion {
     }
 
     public Quantity getQuantityMissing() throws OperationOnQuantitiesException {
-        return calculateQuantityMissing();
+        try {
+            return calculateQuantityMissing();
+        } catch (OperationOnQuantitiesException e) {
+            return null;
+        }
     }
 
 //    public void setQuantityMissing(Quantity quantityMissing) {
@@ -119,7 +122,6 @@ public class AccountabilityReports implements IDocumentConversion {
             d.put("recoveryReports", getRecoveryReports().parallelStream().map(RecoveryReport::toDocument).toList());
             d.put("quantity", getQuantityMissing().toDocument());
         } catch (OperationOnQuantitiesException e) {
-            e.printStackTrace();
             d.put("quantity", null);
         }
         return d;
