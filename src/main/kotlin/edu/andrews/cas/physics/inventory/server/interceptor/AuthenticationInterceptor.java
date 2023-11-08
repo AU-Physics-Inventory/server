@@ -1,6 +1,7 @@
 package edu.andrews.cas.physics.inventory.server.interceptor;
 
 import edu.andrews.cas.physics.inventory.server.auth.LoggedInUsers;
+import edu.andrews.cas.physics.inventory.server.util.Constants;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +19,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.sql.Date;
+import java.time.Instant;
 
 @Component
 public class AuthenticationInterceptor implements HandlerInterceptor {
@@ -36,11 +39,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
-        if (activeProfile.equals("local")) {
-            logger.info("[Auth Interceptor -- Pre-Handle] Bypassing authentication checker");
-            return true;
-        }
-
         logger.info("[Auth Interceptor -- Pre-Handle] Checking request authentication at endpoint {}", request.getRequestURI());
         var requestURI = request.getRequestURI();
         if (request.getMethod().equalsIgnoreCase("options")) return true;
@@ -62,7 +60,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler, Exception ex) throws Exception {
-        HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+        if (request.getRequestURI().equals("/validate")) attemptTokenRenewal(request, response);
     }
 
     private boolean isUserAdmin(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -98,5 +96,24 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if (jwtToken != null) {
             return Jwts.parserBuilder().setSigningKey(this.secretKey).build().parseClaimsJws(jwtToken);
         } else return null;
+    }
+
+    private void attemptTokenRenewal(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        logger.info("[Auth Interceptor] Checking if token qualifies for renewal...");
+        Jws<Claims> claims = getJwsClaimsFromRequest(request);
+        assert claims != null;
+        Claims body = claims.getBody();
+        if (body.getExpiration().before(Date.from(Instant.now().plusMillis(Constants.DEFAULT_TOKEN_REFRESH_DELTA)))) {
+            logger.info("[Auth Interceptor] Token qualifies for renewal! Renewing token...");
+            String renewedToken = Jwts.builder()
+                    .setSubject(body.getSubject())
+                    .setIssuer("Physics Inventory Authentication Service")
+                    .setIssuedAt(Date.from(Instant.now()))
+                    .setExpiration(Date.from(Instant.now().plusMillis(Constants.DEFAULT_TIMEOUT)))
+                    .claim("roles", body.get("roles"))
+                    .signWith(secretKey)
+                    .compact();
+            response.setHeader("X-Token-Renewal", renewedToken);
+        } else logger.info("[Auth Interceptor] Token does not qualify for renewal.");
     }
 }
